@@ -1,3 +1,4 @@
 src/
 ckpt/
 **/__pycache__/
+vis/
