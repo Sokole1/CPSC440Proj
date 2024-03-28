@@ -237,6 +237,18 @@ def Attack_Global(classifier, device, respace, t, eps=16, iter=10, name='attack_
 
 
 # eps=32 ######################
+# i = 0  # or any specific index you have saved your file with
+# save_path = "vis/attack_global_gradpass_v2/resnet50_eps16_iter10_ddim50_t3/"  # Make sure this is the path you've saved your files to
+
+# # Construct the file name
+# file_name = save_path + f'{i}.bin'
+
+# # Load the file
+# loaded_pkg = torch.load(file_name)
+
+# # Print or process the loaded contents
+# print(loaded_pkg)
+
 Attack_Global('resnet50', 'mps', 'ddim50', t=3, eps=16, iter=10, name='attack_global_gradpass', alpha=2, version='v2')
 # Attack_Global('resnet50', 0, 'ddim50', t=3, eps=16, iter=10, name='attack_global_gradpass', alpha=2
 
