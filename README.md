@@ -15,7 +15,7 @@
 ## Introduction
 
 Diff-PGD utilizes strong prior knowledge of Diffusion Model to generate adversarial samples with higher steathiness and controllability. Diff-PGD has the following edges:
-- Generate adversarial samples with higher **steathiness** and **controllability** 
+- Generate adversarial samples with higher **steathiness** and **controllability**
 - Can be easily applied to different scenarios (e.g. global, region, style-based, physical world)
 - Higher **transferability** and **anti-purification** power
 
@@ -84,9 +84,9 @@ Attack_Global(classifier, device, respace, t, eps, iter, name, alpha, version, s
 [iter]                                                 iterations number of PGD
 [name]                                                          name of the exp
 [alpha]                                                        step size of PGD
-[version]                base version v1, v2 is a faster version to be released 
+[version]                base version v1, v2 is a faster version to be released
 [skip]                                                 skip interval of dataset
-``` 
+```
 
 
 
