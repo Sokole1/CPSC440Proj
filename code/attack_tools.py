@@ -6,12 +6,15 @@ import torch
 import os
 from advertorch.attacks import LinfPGDAttack
 import torchvision.models as models
+from torchvision.models import ResNet50_Weights
 # from torchvision.models import VGG19_Weights
 import torch.nn.functional as F
 import torch.nn as nn
 import numpy as np
 from scipy.ndimage import rotate
 import math
+
+res_net_50_weights = ResNet50_Weights.DEFAULT
 
 def gen_pgd_confs(eps, alpha, iter, input_range=(-1, 1)):
     conf = {}
@@ -33,11 +36,11 @@ def gen_mask(x, type, ratio):
     return mask
 
 def gen_pgd_sample(net, x, iter=10, eps=32, alpha=2):
-    adversary = LinfPGDAttack(net, loss_fn=torch.nn.CrossEntropyLoss(reduction="sum"), 
+    adversary = LinfPGDAttack(net, loss_fn=torch.nn.CrossEntropyLoss(reduction="sum"),
                                   eps=eps/255,
-                                  nb_iter=iter, 
-                                  eps_iter=alpha/255, 
-                                  rand_init=False, 
+                                  nb_iter=iter,
+                                  eps_iter=alpha/255,
+                                  rand_init=False,
                                   targeted=False
                                 )
     y = net(x).argmax(1)
@@ -52,23 +55,23 @@ class wrapper(torch.nn.Module):
             self.mask = mask
         def forward(self, x_unmasked):
             return self.net(x_unmasked*self.mask + self.x_masked)
-        
+
 
 def gen_region_pgd_sample(net, x, region_mask, iter=10, eps=16, alpha=2):
-    
-    
+
+
     x_unmasked = x * region_mask
     x_masked   = x.detach() * (1 - region_mask)
 
-        
+
     net = wrapper(net, x_masked, region_mask)
 
-  
-    adversary = LinfPGDAttack(net, loss_fn=torch.nn.CrossEntropyLoss(reduction="sum"), 
+
+    adversary = LinfPGDAttack(net, loss_fn=torch.nn.CrossEntropyLoss(reduction="sum"),
                                   eps=eps/255,
-                                  nb_iter=iter, 
-                                  eps_iter=alpha/255, 
-                                  rand_init=False, 
+                                  nb_iter=iter,
+                                  eps_iter=alpha/255,
+                                  rand_init=False,
                                   targeted=False
                                 )
     y = net(x_masked + x_unmasked).argmax(1)
@@ -93,7 +96,7 @@ def gen_region_pgd_sample(net, x, region_mask, iter=10, eps=16, alpha=2):
 # style loss
 
 class ContentLoss(nn.Module):
-    
+
     def __init__(self, target, weight):
         super(ContentLoss, self).__init__()
         # we 'detach' the target content from the tree used
@@ -114,7 +117,7 @@ class ContentLoss(nn.Module):
         return self.loss
 
 class GramMatrix(nn.Module):
-    
+
     def forward(self, input):
         a, b, c, d = input.size()  # a=batch size(=1)
         # b=number of feature maps
@@ -129,7 +132,7 @@ class GramMatrix(nn.Module):
         return G.div(a * b * c * d)
 
 class StyleLoss(nn.Module):
-    
+
     def __init__(self, target, weight):
         super(StyleLoss, self).__init__()
         self.target = target.detach() * weight
@@ -161,7 +164,7 @@ class Normalization(torch.nn.Module):
     def forward(self, img):
         # normalize ``img``
         return (img - self.mean) / self.std
-    
+
 content_layers_default = ['conv_4']
 style_layers_default = ['conv_1', 'conv_2', 'conv_3', 'conv_4', 'conv_5']
 
@@ -170,7 +173,8 @@ def get_style_model_and_losses(style_img, content_img,
                                style_weight=1000, content_weight=1,
                                content_layers=content_layers_default,
                                style_layers=style_layers_default):
-    
+
+    # TODO: try both ResNet50_Weights.IMAGENET1K_V1 (old) as well as ResNet50_Weights.DEFAULT (latest), compare both
     cnn = models.vgg19(pretrained=True).features
     cnn = cnn.to(content_img.device)
     cnn.eval()
@@ -240,11 +244,11 @@ def get_style_model_and_losses(style_img, content_img,
 
 
 def get_style_loss_grad(x, model, style_losses, content_losses, style_weight=100, content_weight=1):
-    
+
     assert x.requires_grad==True
     x.retain_grad()
-    
-    
+
+
     model(x)
 
     style_score = 0
@@ -257,7 +261,7 @@ def get_style_loss_grad(x, model, style_losses, content_losses, style_weight=100
 
     score = style_score + content_score
     # score.backward()
-    
+
 
     return x.grad
 
@@ -269,10 +273,10 @@ def init_patch_circle(image_size, patch_size):
     image_size = image_size**2
     noise_size = int(image_size*patch_size)
     radius = int(math.sqrt(noise_size/math.pi))
-    patch = np.zeros((1, 3, radius*2, radius*2))    
+    patch = np.zeros((1, 3, radius*2, radius*2))
     for i in range(3):
-        a = np.zeros((radius*2, radius*2))    
-        cx, cy = radius, radius # The center of circle 
+        a = np.zeros((radius*2, radius*2))
+        cx, cy = radius, radius # The center of circle
         y, x = np.ogrid[-radius: radius, -radius: radius]
         index = x**2 + y**2 <= radius**2
         a[cy-radius:cy+radius, cx-radius:cx+radius][index] = np.random.rand()
@@ -284,12 +288,12 @@ def init_patch_circle(image_size, patch_size):
 
 # physical attacks
 def circle_transform(patch, data_shape, patch_shape, image_size):
-    # get dummy image 
+    # get dummy image
     x = np.zeros(data_shape)
-   
+
     # get shape
     m_size = patch_shape[-1]
-    
+
     for i in range(x.shape[0]):
 
         # random rotation
@@ -298,7 +302,7 @@ def circle_transform(patch, data_shape, patch_shape, image_size):
             patch[i][j] = rotate(patch[i][j], angle=rot, reshape=False)
         for j in range(patch[i].shape[0]):
             patch[i][j] = np.rot90(patch[i][j], rot)
-        
+
         # random location
         random_x = np.random.choice(image_size)
         if random_x + m_size > x.shape[-1]:
@@ -308,14 +312,13 @@ def circle_transform(patch, data_shape, patch_shape, image_size):
         if random_y + m_size > x.shape[-1]:
             while random_y + m_size > x.shape[-1]:
                 random_y = np.random.choice(image_size)
-       
-        # apply patch to dummy image  
+
+        # apply patch to dummy image
         x[i][0][random_x:random_x+patch_shape[-1], random_y:random_y+patch_shape[-1]] = patch[i][0]
         x[i][1][random_x:random_x+patch_shape[-1], random_y:random_y+patch_shape[-1]] = patch[i][1]
         x[i][2][random_x:random_x+patch_shape[-1], random_y:random_y+patch_shape[-1]] = patch[i][2]
-    
+
     mask = np.copy(x)
     mask[mask != 0] = 1.0
-    
-    return x, mask, patch.shape
 
+    return x, mask, patch.shape
