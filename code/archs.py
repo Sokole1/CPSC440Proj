@@ -1,7 +1,7 @@
 from dataset import get_normalize_layer, get_input_center_layer
 from torch.nn.functional import interpolate
 import torchvision
-from torchvision.models import ResNet50_Weights
+from torchvision.models import ResNet50_Weights, Wide_ResNet101_2_Weights, Wide_ResNet50_2_Weights, ResNet18_Weights, ResNet101_Weights
 from transformers import ViTFeatureExtractor, ViTModel, ViTForImageClassification, BeitFeatureExtractor, BeitForImageClassification
 import torch
 import torch.backends.cudnn as cudnn
@@ -11,7 +11,7 @@ from denoise import Denoiser
 
 from robustbench.utils import load_model
 
-res_net_50_weights = ResNet50_Weights
+# TODO: try both ResNet50_Weights.IMAGENET1K_V1 (old) as well as ResNet50_Weights.DEFAULT (latest), compare both
 
 IMAGENET_MODEL = [
     'resnet50',
@@ -31,19 +31,19 @@ IMAGENET_MODEL_ROBUST = [
 def get_archs(arch, dataset='imagenet'):
     if dataset == 'imagenet':
         if   arch == 'resnet50':
-            model = torchvision.models.resnet50(weights=res_net_50_weights)
+            model = torchvision.models.resnet50(weights=ResNet50_Weights.DEFAULT)
 
         elif arch == 'resnet101':
-            model = torchvision.models.resnet101(weights=res_net_50_weights)
+            model = torchvision.models.resnet101(weights=ResNet101_Weights.DEFAULT)
 
         elif arch == 'resnet18':
-            model = torchvision.models.resnet18(weights=res_net_50_weights)
+            model = torchvision.models.resnet18(weights=ResNet18_Weights.DEFAULT)
 
         elif arch == 'wrn50':
-            model = torchvision.models.wide_resnet50_2(weights=res_net_50_weights)
+            model = torchvision.models.wide_resnet50_2(weights=Wide_ResNet50_2_Weights.DEFAULT)
 
         elif arch == 'wrn101':
-            model = torchvision.models.wide_resnet101_2(weights=res_net_50_weights)
+            model = torchvision.models.wide_resnet101_2(weights=Wide_ResNet101_2_Weights.DEFAULT)
 
         elif arch == 'beit':
             model = BeitForImageClassification.from_pretrained('microsoft/beit-large-patch16-224')

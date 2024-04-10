@@ -174,7 +174,7 @@ def get_style_model_and_losses(style_img, content_img,
                                content_layers=content_layers_default,
                                style_layers=style_layers_default):
 
-    # TODO: try both ResNet50_Weights.IMAGENET1K_V1 (old) as well as ResNet50_Weights.DEFAULT (latest), compare both
+    # TODO: VGG19_Weights
     cnn = models.vgg19(pretrained=True).features
     cnn = cnn.to(content_img.device)
     cnn.eval()
