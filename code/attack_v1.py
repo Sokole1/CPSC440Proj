@@ -15,7 +15,7 @@ import glob
 
 
 
-    
+
 def ddim_sample_self_made(model, diffusion, shape, device):
 
     # shape: b * c * h * w
@@ -34,17 +34,17 @@ def ddim_sample_self_made(model, diffusion, shape, device):
     indices = tqdm(indices)
 
     for id in indices:
-        
+
         t = torch.full((B, ), id).long().to(device)
 
         sample = diffusion.ddim_sample(model, sample, t)["sample"]
-    
+
 
     return sample
 
 
 
-    
+
 
 def recons_self_made(diffusion, model, image, mask, device, ddim, scale=2):
     # image : bchw, mask : bchw, 0, 1
@@ -60,10 +60,10 @@ def recons_self_made(diffusion, model, image, mask, device, ddim, scale=2):
 
     indices = tqdm(indices)
 
-    
+
 
     for id in indices:
-        
+
         t = torch.full((B, ), id).long().to(device)
 
         with torch.no_grad():
@@ -75,11 +75,11 @@ def recons_self_made(diffusion, model, image, mask, device, ddim, scale=2):
                 # sample = diffusion.p_sample(model, sample, t)["sample"]
 
         sample = sample * (1. - mask) + diffusion.q_sample(image, t) * mask
-    
+
 
     return sample
-    
-    
+
+
 
 
 
@@ -99,15 +99,15 @@ def repaint_self_made(diffusion, model, image, mask, device, ddim, resample_num=
 
     indices = tqdm(indices)
 
-    
+
 
     for id in indices:
-        
+
         if id % jump:
             resample_num_ = resample_num
         else:
             resample_num_ = 1
-        
+
         t = torch.full((B, ), id).long().to(device)
 
         with torch.no_grad():
@@ -118,33 +118,33 @@ def repaint_self_made(diffusion, model, image, mask, device, ddim, resample_num=
                     sample = diffusion.ddim_sample(model, sample, t)["sample"]
                 else:
                     sample = diffusion.p_sample(model, sample, t)["sample"]
-            
+
             else:
                 if ddim:
                     sample = diffusion.ddim_sample(model, sample, t)["pred_xstart"]
                 else:
                     sample = diffusion.p_sample(model, sample, t)["pred_xstart"]
-                
+
                 for _ in range(resample_num_-2):
                     sample = diffusion.q_sample(sample, t)
                     if ddim:
                         sample = diffusion.ddim_sample(model, sample, t)["pred_xstart"]
                     else:
                         sample = diffusion.p_sample(model, sample, t)["pred_xstart"]
-                
+
                 sample = diffusion.q_sample(sample, t)
-                
+
                 if ddim:
                     sample = diffusion.ddim_sample(model, sample, t)["sample"]
                 else:
                     sample = diffusion.p_sample(model, sample, t)["sample"]
-                
-                    
+
+
 
 
 
         sample = sample * (1. - mask) + diffusion.q_sample(image, t) * mask
-    
+
     return sample
 
 
@@ -154,27 +154,27 @@ def test_dm():
     )
     x, _ = dataset[0]
     x = x.cuda()[None,...]
-    
+
     x = x * 2 - 1
-    
+
     # print(x.min(), x.max())
-    
+
     model, diffusion = get_imagenet_dm_conf(device=x.device, respace='ddim100')
-    
-    
+
+
     t = torch.full((1, ), 10).long().cuda()
-    
-    x_t = diffusion.q_sample(x, t) 
-    
+
+    x_t = diffusion.q_sample(x, t)
+
     # print(x_t.min(), x_t.max())
-    
+
     si(x_t, 'vis/noised_x.png', to_01=True)
-    
+
     out = diffusion.ddim_sample(model, x_t, t)['pred_xstart']
     print(out.min(), out.max())
-    
+
     si(out, 'vis/ddim_pred_x0.png',  to_01=True)
-    
+
     # out = diffusion.ddim_sample_loop(model, shape=(10, 3, 256, 256), progress=True)
     # torch.save(out, 'ddim_sample.bin')
     with torch.no_grad():
@@ -201,14 +201,14 @@ def test_repaint():
     dataset = get_dataset(
         'imagenet', split='test'
     )
-    
+
     x = torch.stack([dataset[i][0] for i in range(0, 10000, 1000)])
 
     print(x.shape)
-    
+
     x = x * 2 - 1
     x = x.to(0)
-    
+
     mask = gen_mask(x, type='square', ratio=0.4)
 
     si(mask, 'vis/mask.png')
@@ -218,21 +218,21 @@ def test_repaint():
     si(out, f'vis/repaint_{respace}.png', to_01=True)
     si(x*mask, f'vis/before_repaint_{respace}.png', to_01=True)
 
-    
+
     return
 
 def test_reconstruct(device, ratio):
     dataset = get_dataset(
         'imagenet', split='test'
     )
-    
+
     x = torch.stack([dataset[i][0] for i in range(0, 10000, 1000)])
 
     print(x.shape)
-    
+
     x = x * 2 - 1
     x = x.to(device)
-    
+
     mask = gen_mask(x, type='square', ratio=ratio)
 
     respace='ddim50'
@@ -241,38 +241,38 @@ def test_reconstruct(device, ratio):
     si(out, f'vis/recons_{respace}.png', to_01=True)
     si(x*mask, f'vis/before_recons_{respace}.png', to_01=True)
 
-    
+
     return
-    
-    
+
+
 
 
 
 
 
 def play_with_pgd(classifier, device):
-    
+
     pgd_conf = gen_pgd_confs(eps=4, alpha=1, iter=100, input_range=(0, 1))
-    
+
     classifier = get_archs(classifier, 'imagenet')
-    
+
     classifier = classifier.to(device)
     classifier.eval()
-    
+
     dataset = get_dataset(
         'imagenet', split='test'
     )
-    
+
     skip = 200
-    
+
     a = 0
     c = 0
-    
-    
+
+
     transfer_list = torch.zeros(len(IMAGENET_MODEL))
-    
+
     c = 0
-    
+
     for i in range(dataset.__len__()):
         if i % skip != 0:
             continue
@@ -280,39 +280,39 @@ def play_with_pgd(classifier, device):
         x, y = dataset[i]
         x = x[None, ].to(device)
         y = torch.tensor(y)[None, ].to(device)
-            
+
 
         pred_raw = classifier(x).argmax(1)
-        
-        adversary = LinfPGDAttack(classifier, loss_fn=torch.nn.CrossEntropyLoss(reduction="sum"), 
+
+        adversary = LinfPGDAttack(classifier, loss_fn=torch.nn.CrossEntropyLoss(reduction="sum"),
                                   eps=pgd_conf['eps'],
-                                  nb_iter=pgd_conf['iter'], 
-                                  eps_iter=pgd_conf['alpha'], 
-                                  rand_init=True, 
-                                  clip_min=0.0, 
+                                  nb_iter=pgd_conf['iter'],
+                                  eps_iter=pgd_conf['alpha'],
+                                  rand_init=True,
+                                  clip_min=0.0,
                                   clip_max=1.0,
                                   targeted=False
                                 )
-        
+
         x_adv = adversary.perturb(x, y)
         # print(time.time() - t)
-        
+
         si(x_adv, 'vis/x_adv.png')
-        
+
         pred = classifier(x_adv).argmax(1)
         print('gt:[{}], raw:[{}], adv:[{}]'.format(y[0].item(), pred_raw[0].item(), pred[0].item()))
-        
+
         transfer_r = transfer_bench(IMAGENET_MODEL, x_adv, x, y, device)
-        
+
         transfer_list += torch.tensor(transfer_r)
-        
+
         c += 1
-    
+
     plt.bar(IMAGENET_MODEL, transfer_list/c)
     plt.savefig(f"vis/transfer_bench/transfer_bench_eps{pgd_conf['eps']}.png")
-        
-        
-        
+
+
+
 
 
 def loss_fn():
@@ -321,31 +321,31 @@ def loss_fn():
 
 
 
-        
+
 
 def generate_x_adv_denoised(x, y, diffusion, model, classifier, pgd_conf, device, t):
-    
-    
+
+
     net = Denoised_Classifier(diffusion, model, classifier, t)
-    
-    
-    adversary = LinfPGDAttack(net, loss_fn=torch.nn.CrossEntropyLoss(reduction="sum"), 
+
+
+    adversary = LinfPGDAttack(net, loss_fn=torch.nn.CrossEntropyLoss(reduction="sum"),
                                   eps=pgd_conf['eps'],
-                                  nb_iter=pgd_conf['iter'], 
-                                  eps_iter=pgd_conf['alpha'], 
-                                  rand_init=True, 
+                                  nb_iter=pgd_conf['iter'],
+                                  eps_iter=pgd_conf['alpha'],
+                                  rand_init=True,
                                   targeted=False
                                 )
-    
-    x_adv = adversary.perturb(x, y)
-    
-    return x_adv
-    
 
-    
+    x_adv = adversary.perturb(x, y)
+
+    return x_adv
+
+
+
 def exp_1(classifier, device, respace, t, eps=8, iter=10, ):
-    
-    
+
+
     pgd_conf = gen_pgd_confs(eps=eps, alpha=1, iter=iter, input_range=(0, 1))
 
     save_path = f'vis/exp1/{classifier}_eps{eps}_iter{iter}_{respace}_t{t}/'
@@ -353,19 +353,19 @@ def exp_1(classifier, device, respace, t, eps=8, iter=10, ):
     mp(save_path)
 
 
-    
+
     classifier = get_archs(classifier, 'imagenet')
-    
+
     classifier = classifier.to(device)
     classifier.eval()
-    
+
     dataset = get_dataset(
         'imagenet', split='test'
     )
-    
+
 
     model, diffusion = get_imagenet_dm_conf(device=device, respace=respace)
-    
+
     skip = 200
     c = 0
 
@@ -379,13 +379,13 @@ def exp_1(classifier, device, respace, t, eps=8, iter=10, ):
         x, y = dataset[i]
         x = x[None, ].to(device)
         y = torch.tensor(y)[None, ].to(device)
-        
+
         y_pred = classifier(x).argmax(1)
-            
+
         x_adv = generate_x_adv_denoised(x, y_pred, diffusion, model, classifier, pgd_conf, device, t)
-        
+
         net = Denoised_Classifier(diffusion, model, classifier, t)
-        
+
         pred_x0 = net.sdedit(x_adv, t)
 
         pkg = {
@@ -395,7 +395,7 @@ def exp_1(classifier, device, respace, t, eps=8, iter=10, ):
             'x_adv_diff': pred_x0,
         }
 
-        
+
         torch.save(pkg, save_path+f'{i}.bin')
         si(torch.cat([x, x_adv, pred_x0], -1), save_path + f'{i}.png')
 
@@ -404,24 +404,24 @@ def exp_1(classifier, device, respace, t, eps=8, iter=10, ):
 
         c += 1
 
-        
-@torch.enable_grad()       
+
+@torch.enable_grad()
 def pgd_baseline_sample(net, x, iter=10, eps=8, alpha=2):
-    adversary = LinfPGDAttack(net, loss_fn=torch.nn.CrossEntropyLoss(reduction="sum"), 
+    adversary = LinfPGDAttack(net, loss_fn=torch.nn.CrossEntropyLoss(reduction="sum"),
                                   eps=eps/255,
-                                  nb_iter=iter, 
-                                  eps_iter=alpha/255, 
-                                  rand_init=True, 
+                                  nb_iter=iter,
+                                  eps_iter=alpha/255,
+                                  rand_init=True,
                                   targeted=False
                                 )
     y = net(x).argmax(1)
     return adversary.perturb(x, y)
-    
-        
+
+
 
 def diff_camouflage_v1(x, y, diffusion, model, classifier, pgd_conf, device, t):
-    
-    pass      
+
+    pass
 
 
 
@@ -448,10 +448,10 @@ def cal_transfer_bench(p, classifier, device, out_p):
     net = net.to(device)
     net.eval()
     bins = glob.glob(p+'/*.bin')
-    
+
     def get_pred(x, net):
-        return net(x).argmax(1)[0].item()    
-    
+        return net(x).argmax(1)[0].item()
+
 
     x_adv_list = torch.zeros(len(IMAGENET_MODEL))
     x_adv_diff_list = torch.zeros(len(IMAGENET_MODEL))
@@ -480,7 +480,7 @@ def cal_transfer_bench(p, classifier, device, out_p):
         print(x_adv_r)
         print(x_adv_diff_r)
         print(x_pgd_r)
-    
+
     print(x_adv_list)
     print(x_adv_diff_list)
     print(x_pgd_list)
@@ -496,26 +496,26 @@ class Denoised_Classifier(torch.nn.Module):
         self.model = model
         self.classifier = classifier
         self.t = t
-    
+
     def sdedit(self, x, t, to_01=True):
 
         # assume the input is 0-1
-        
+
         x = x * 2 - 1
-        
+
         t = torch.full((x.shape[0], ), t).long().to(x.device)
-    
-        x_t = self.diffusion.q_sample(x, t) 
-        
+
+        x_t = self.diffusion.q_sample(x, t)
+
         sample = x_t
-    
+
         # print(x_t.min(), x_t.max())
-    
+
         # si(x_t, 'vis/noised_x.png', to_01=True)
-        
+
         indices = list(range(t+1))[::-1]
-        
-        # visualize 
+
+        # visualize
         l_sample=[]
         l_predxstart=[]
 
@@ -529,8 +529,8 @@ class Denoised_Classifier(torch.nn.Module):
 
             l_sample.append(out['sample'])
             l_predxstart.append(out['pred_xstart'])
-        
-        
+
+
         # visualize
         si(torch.cat(l_sample), 'l_sample.png', to_01=1)
         si(torch.cat(l_predxstart), 'l_pxstart.png', to_01=1)
@@ -538,12 +538,12 @@ class Denoised_Classifier(torch.nn.Module):
         # the output of diffusion model is [-1, 1], should be transformed to [0, 1]
         if to_01:
             sample = (sample + 1) / 2
-        
+
         return sample
-        
-    
+
+
     def forward(self, x):
-        
+
         out = self.sdedit(x, self.t) # [0, 1]
         out = self.classifier(out)
         return out
@@ -559,19 +559,19 @@ from bench import *
 
 @torch.no_grad()
 def cal_anti_purify_bench(p, classifier, device, out_p, respace='ddim50', t=5, save_p='draw/antip/'):
-    
+
     mp(save_p)
-    
+
     net = get_archs(classifier)
     net = net.to(device)
     net.eval()
     model, diffusion = get_imagenet_dm_conf(respace=respace, device=device)
 
     bins = glob.glob(p+'/*.bin')
-    
+
     def get_pred(x, net):
-        return net(x).argmax(1)[0].item()    
-    
+        return net(x).argmax(1)[0].item()
+
 
     x_adv_list = torch.zeros(len(IMAGENET_MODEL))
     x_adv_diff_list = torch.zeros(len(IMAGENET_MODEL))
@@ -611,7 +611,7 @@ def cal_anti_purify_bench(p, classifier, device, out_p, respace='ddim50', t=5, s
             ],
             -2
         ), save_p+f'{i}.png')
-        
+
         print(save_p+f'{i}.png')
         print(torch.abs((x_pgd_p-x_pgd)).norm(p=2),
               torch.abs((x_adv_p--x_adv)).norm(p=2),
@@ -624,7 +624,7 @@ def cal_anti_purify_bench(p, classifier, device, out_p, respace='ddim50', t=5, s
         # print(x_adv_r)
         # print(x_adv_diff_r)
         # print(x_pgd_r)
-    
+
     print(x_adv_list)
     print(x_adv_diff_list)
     print(x_pgd_list)
@@ -639,7 +639,7 @@ def cal_stealthiness(image_list):
 
 def diff_adv_patch(image, diffusion, model, classifier):
     pass
-    
+
 
 # test_dm()
 
@@ -656,4 +656,4 @@ def diff_adv_patch(image, diffusion, model, classifier):
 
 # cal_anti_purify_bench('vis/attack_global_new2/resnet50_eps32_iter10_ddim10_t2', 'resnet50', 2, 'vis/anti_purify_bench', respace="ddim20", t=2)
 
-cal_anti_purify_bench('vis/exp1/resnet50_eps16_iter10_ddim100_t2', 'resnet50', 2, 'vis/anti_purify_bench', respace="ddim20", t=2)
+cal_anti_purify_bench('vis/exp1/resnet50_eps16_iter10_ddim100_t2', 'resnet50', 'cpu', 'vis/anti_purify_bench', respace="ddim20", t=2)
