@@ -103,9 +103,11 @@ An example of a claim that is too vague, which can't be supported by experiments
 
 This section roughly tells a reader what to expect in the rest of the report. Clearly itemize the claims you are testing:
 \begin{itemize}
-    \item Claim 1
-    \item Claim 2
-    \item Claim 3
+    \item Diffusion-Based Projected Gradient Descent (Diff-PGD) generates realistic adversarial samples
+    \item Diff-PGD can be applied to specific tasks such as digital attacks, physical-world attacks, and style-based attacks, outperforming baseline methods such as PGD, AdvPatch, and AdvCam.
+    \item Diff-PGD is more stable and controllable compared to existing methods for generating natural-style adversarial samples.
+    % \item The samples generated using Diff-PGD have better transferability and anti-purification power than traditional gradient-based methods.
+    \item Diff-PGD surpasses the original PGD in Transferability and Purification power
 \end{itemize}
 
 Each experiment in Section~\ref{sec:results} will support (at least) one of these claims, so a reader of your report should be able to separately understand the \emph{claims} and the \emph{evidence} that supports them.
