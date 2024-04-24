@@ -101,8 +101,10 @@ A claim should be something that can be supported or rejected by your data. An e
 This is concise, and is something that can be supported by experiments.
 An example of a claim that is too vague, which can't be supported by experiments, is ``Contextual embedding models have shown strong performance on a number of tasks. We will run experiments evaluating two types of contextual embedding models on datasets X, Y, and Z."
 
-This section roughly tells a reader what to expect in the rest of the report. Clearly itemize the claims you are testing:
-\begin{itemize}
+% This section roughly tells a reader what to expect in the rest of the report. Clearly itemize the claims you are testing:
+
+We investigate the main claims from the original paper, which are:
+\begin{enumerate}
     % \item Diffusion-Based Projected Gradient Descent (Diff-PGD) generates realistic adversarial samples
     \item Diff-PGD can be applied to specific tasks such as digital attacks, physical-world attacks, and style-based attacks, outperforming baseline methods such as PGD, AdvPatch, and AdvCam.
     \item Diff-PGD is more stable and controllable compared to existing methods for generating natural-style adversarial samples.
@@ -111,7 +113,7 @@ This section roughly tells a reader what to expect in the rest of the report. Cl
     \item Diff-PGD generates adversarial samples with higher stealthiness
     % \item Diff-PGD generates images that are more stealthy compared to PGD-generated samples for digital attacks.
     % \item Diff-rPGD generates images that are more stealthy compared to rPGD-generated samples for digital attacks.
-\end{itemize}
+\end{enumerate}
 
 Each experiment in Section~\ref{sec:results} will support (at least) one of these claims, so a reader of your report should be able to separately understand the \emph{claims} and the \emph{evidence} that supports them.
 
@@ -126,6 +128,8 @@ Include a description of each model or algorithm used. Be sure to list the type 
 \subsection{Datasets}
 For each dataset include 1) relevant statistics such as the number of examples and label distributions, 2) details of train / dev / test splits, 3) an explanation of any preprocessing done, and 4) a link to download the data (if available).
 
+The original paper used ImageNet, but due to limitations in compute and memory, we used a smaller subset of ImageNet with 1000 samples: \url{https://www.kaggle.com/datasets/ifigotin/imagenetmini-1000}
+
 \subsection{Hyperparameters}
 Describe how the hyperparameter values were set. If there was a hyperparameter search done, be sure to include the range of hyperparameters searched over, the method used to search (e.g. manual search, random search, Bayesian optimization, etc.), and the best hyperparameters found. Include the number of total experiments (e.g. hyperparameter trials). You can also include all results from that search (not just the best-found results).
 
@@ -133,6 +137,18 @@ Describe how the hyperparameter values were set. If there was a hyperparameter s
 Include a description of how the experiments were set up that's clear enough a reader could replicate the setup.
 Include a description of the specific measure used to evaluate the experiments (e.g. accuracy, precision@K, BLEU score, etc.).
 Provide a link to your code.
+
+We ran the code given by the authors.
+We copied the hyperparameter setup of the authors.\\
+
+Physical-World Attacks:\\
+We first tried the one of the attacks created by the authors, which was a computer-mouse.\\
+We then tried our own physical world attack using an image patch of a ... and a ... as our target object.\\
+We use an (type of phone here, ex. iPhone 8-Plus) to take images from the real world and use an (type of printer here, ex. HP DeskJet-2752) to print the image in color.\\
+We stuck the original image on ..., and classified it using all 5 classifiers (R50, R101, R18, WR50, WR101)
+
+We tested for Success Attack Rate of Diff-PGD using 250 uniformly sampled images from our dataset. (See figure ...)\\
+The code for the figure in the paper was not provided, so we created our own code to generate the figure.\\
 
 \subsection{Computational requirements}
 Include a description of the hardware used, such as the GPU or CPU the experiments were run on.
@@ -143,6 +159,18 @@ For each experiment, include the total computational requirements (e.g. the tota
 \section{Results}
 \label{sec:results}
 Start with a high-level overview of your results. Do your results support the main claims of the original paper? Keep this section as factual and precise as possible, reserve your judgement and discussion points for the next "Discussion" section.
+\begin{center}
+  Original paper results
+  \begin{tabular}{ l c c c c r }
+    \hline
+    \textbf{Sample} & \textbf{(+P)ResNet50} & \textbf{(+P)ResNet101} & \textbf{(+P)ResNet18} & \textbf{(+P)WRN50} & \textbf{(+P)WRN101} \\ \hline
+    $x_{PGD}$ & 0.35 & 0.18 & 0.26 & 0.20 & 0.17 \\
+    $x_{n}$ (Ours) & 0.35 & 0.18 & 0.26 & 0.20 & 0.17 \\
+    $x_{n}^0$ (Ours) & 0.35 & 0.18 & 0.26 & 0.20 & 0.17 \\
+    \hline
+  \end{tabular}
+\end{center}
+
 
 
 \subsection{Results reproducing original paper}
