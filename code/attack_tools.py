@@ -6,7 +6,7 @@ import torch
 import os
 from advertorch.attacks import LinfPGDAttack
 import torchvision.models as models
-from torchvision.models import ResNet50_Weights
+from torchvision.models import ResNet50_Weights, VGG19_Weights
 # from torchvision.models import VGG19_Weights
 import torch.nn.functional as F
 import torch.nn as nn
@@ -175,7 +175,7 @@ def get_style_model_and_losses(style_img, content_img,
                                style_layers=style_layers_default):
 
     # TODO: VGG19_Weights
-    cnn = models.vgg19(pretrained=True).features
+    cnn = models.vgg19(weights=VGG19_Weights.DEFAULT).features
     cnn = cnn.to(content_img.device)
     cnn.eval()
 

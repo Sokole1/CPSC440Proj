@@ -283,7 +283,7 @@ def Attack_Physics(mode, bkg_name, patch_name, classifier, device, respace, t, t
 
 
 default_iter = 1500
-
+default_device = 'cpu'
 
 ######################## adv-patch #####################################
 # Attack_Physics(mode='adv-patch', bkg_name='computer_mouse', patch_name='apple', classifier='resnet50', \
@@ -295,13 +295,13 @@ default_iter = 1500
 
 
 Attack_Physics(mode='adv-patch', bkg_name='laptop', patch_name='planda', classifier='resnet50', \
-                device=0, respace=None, t=None, target=None, c_w=0, s_m=0, iter=default_iter, name='attack_physics')
+                device=default_device, respace=None, t=None, target=None, c_w=0, s_m=0, iter=default_iter, name='attack_physics')
 
 Attack_Physics(mode='adv-patch', bkg_name='laptop', patch_name='planda', classifier='resnet50', \
-                device=0, respace=None, t=None, target=531, c_w=0, s_m=0, iter=default_iter, name='attack_physics')
+                device=default_device, respace=None, t=None, target=531, c_w=0, s_m=0, iter=default_iter, name='attack_physics')
 
 Attack_Physics(mode='adv-patch', bkg_name='suitcase', patch_name='forest', classifier='resnet50', \
-                device=0, respace=None, t=None, target=None, c_w=0, s_m=0, iter=default_iter, name='attack_physics')
+                device=default_device, respace=None, t=None, target=None, c_w=0, s_m=0, iter=default_iter, name='attack_physics')
 ######################## adv-patch #####################################
 
 
@@ -316,13 +316,13 @@ Attack_Physics(mode='adv-patch', bkg_name='suitcase', patch_name='forest', class
 
 
 Attack_Physics(mode='advcam', bkg_name='laptop', patch_name='planda', classifier='resnet50', \
-                device=0, respace=None, t=None, target=None, c_w=1, s_m=0.01, iter=default_iter, name='attack_physics')
+                device=default_device, respace=None, t=None, target=None, c_w=1, s_m=0.01, iter=default_iter, name='attack_physics')
 
 Attack_Physics(mode='advcam', bkg_name='laptop', patch_name='planda', classifier='resnet50', \
-                device=0, respace=None, t=None, target=531, c_w=1, s_m=0.01, iter=default_iter, name='attack_physics')
+                device=default_device, respace=None, t=None, target=531, c_w=1, s_m=0.01, iter=default_iter, name='attack_physics')
 
 Attack_Physics(mode='advcam', bkg_name='suitcase', patch_name='forest', classifier='resnet50', \
-                device=0, respace=None, t=None, target=None, c_w=1, s_m=0.01, iter=default_iter, name='attack_physics')
+                device=default_device, respace=None, t=None, target=None, c_w=1, s_m=0.01, iter=default_iter, name='attack_physics')
 # ######################## advcam #####################################
 
 
@@ -335,12 +335,12 @@ Attack_Physics(mode='advcam', bkg_name='suitcase', patch_name='forest', classifi
 
 
 Attack_Physics(mode='diff-pgd', bkg_name='laptop', patch_name='planda', classifier='resnet50', \
-                device='cpu', respace='ddim10', t=2, target=None, c_w=1, s_m=0.01, iter=default_iter, name='attack_physics')
+                device=default_device, respace='ddim10', t=2, target=None, c_w=1, s_m=0.01, iter=default_iter, name='attack_physics')
 
 Attack_Physics(mode='diff-pgd', bkg_name='laptop', patch_name='planda', classifier='resnet50', \
-                device='cpu', respace='ddim10', t=2, target=531, c_w=1, s_m=0.01, iter=default_iter, name='attack_physics')
+                device=default_device, respace='ddim10', t=2, target=531, c_w=1, s_m=0.01, iter=default_iter, name='attack_physics')
 
 Attack_Physics(mode='diff-pgd', bkg_name='suitcase', patch_name='forest', classifier='resnet50', \
-                device='cpu', respace='ddim10', t=2, target=None, c_w=1, s_m=0.01, iter=default_iter, name='attack_physics')
+                device=default_device, respace='ddim10', t=2, target=None, c_w=1, s_m=0.01, iter=default_iter, name='attack_physics')
 # 1000
 ####################### diff-pgd #####################################
