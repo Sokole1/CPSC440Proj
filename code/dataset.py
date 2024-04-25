@@ -5,7 +5,7 @@ from torchvision.datasets.utils import check_integrity
 from typing import *
 # from zipdata import ZipData
 
-import bisect 
+import bisect
 import numpy as np
 import os
 import pickle
@@ -27,7 +27,7 @@ def get_dataset(dataset: str, split: str) -> Dataset:
     """Return the dataset as a PyTorch Dataset object"""
     if dataset == "imagenet":
         return _imagenet(split)
-    
+
     elif dataset == "imagenet32":
         return _imagenet32(split)
 
@@ -41,7 +41,7 @@ def get_dataset(dataset: str, split: str) -> Dataset:
 def get_num_classes(dataset: str):
     """Return the number of classes in the dataset. """
     if 'imagenet' in dataset:
-        return 1000
+        return 1001
     elif "cifar10" in dataset:
         return 10
 
@@ -63,8 +63,8 @@ def get_normalize_layer(dataset: str, diff=None, vit=None) -> torch.nn.Module:
         print("vit norm")
     elif dataset == "imagenet32":
         return NormalizeLayer(_IMAGENET_MEAN, _IMAGENET_STDDEV)
-    
- 
+
+
 
 
 def get_input_center_layer(dataset: str) -> torch.nn.Module:
@@ -157,13 +157,13 @@ def _imagenet(split: str) -> Dataset:
 
 def _imagenet32(split: str) -> Dataset:
     dataset_path = os.path.join(os.getenv('PT_DATA_DIR', 'datasets'), 'Imagenet32')
-   
+
     if split == "train":
         return ImageNetDS(dataset_path, 32, train=True, transform=transforms.Compose([
-                        transforms.RandomCrop(32, padding=4), 
-                        transforms.RandomHorizontalFlip(), 
+                        transforms.RandomCrop(32, padding=4),
+                        transforms.RandomHorizontalFlip(),
                         transforms.ToTensor()]))
-    
+
     elif split == "test":
         return ImageNetDS(dataset_path, 32, train=False, transform=transforms.ToTensor())
 
