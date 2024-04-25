@@ -294,14 +294,14 @@ default_device = 'cpu'
 
 
 
-Attack_Physics(mode='adv-patch', bkg_name='laptop', patch_name='planda', classifier='resnet50', \
-                device=default_device, respace=None, t=None, target=None, c_w=0, s_m=0, iter=default_iter, name='attack_physics')
+# Attack_Physics(mode='adv-patch', bkg_name='laptop', patch_name='planda', classifier='resnet50', \
+#                 device=default_device, respace=None, t=None, target=None, c_w=0, s_m=0, iter=default_iter, name='attack_physics')
 
-Attack_Physics(mode='adv-patch', bkg_name='laptop', patch_name='planda', classifier='resnet50', \
-                device=default_device, respace=None, t=None, target=531, c_w=0, s_m=0, iter=default_iter, name='attack_physics')
+# Attack_Physics(mode='adv-patch', bkg_name='laptop', patch_name='planda', classifier='resnet50', \
+#                 device=default_device, respace=None, t=None, target=531, c_w=0, s_m=0, iter=default_iter, name='attack_physics')
 
-Attack_Physics(mode='adv-patch', bkg_name='water_bottle', patch_name='forest', classifier='resnet50', \
-                device=default_device, respace=None, t=None, target=None, c_w=0, s_m=0, iter=default_iter, name='attack_physics')
+# Attack_Physics(mode='adv-patch', bkg_name='water_bottle', patch_name='forest', classifier='resnet50', \
+#                 device=default_device, respace=None, t=None, target=None, c_w=0, s_m=0, iter=default_iter, name='attack_physics')
 ######################## adv-patch #####################################
 
 
@@ -315,8 +315,8 @@ Attack_Physics(mode='adv-patch', bkg_name='water_bottle', patch_name='forest', c
 
 
 
-Attack_Physics(mode='advcam', bkg_name='laptop', patch_name='planda', classifier='resnet50', \
-                device=default_device, respace=None, t=None, target=None, c_w=1, s_m=0.01, iter=default_iter, name='attack_physics')
+# Attack_Physics(mode='advcam', bkg_name='laptop', patch_name='planda', classifier='resnet50', \
+#                 device=default_device, respace=None, t=None, target=None, c_w=1, s_m=0.01, iter=default_iter, name='attack_physics')
 
 Attack_Physics(mode='advcam', bkg_name='laptop', patch_name='planda', classifier='resnet50', \
                 device=default_device, respace=None, t=None, target=531, c_w=1, s_m=0.01, iter=default_iter, name='attack_physics')
@@ -334,8 +334,8 @@ Attack_Physics(mode='advcam', bkg_name='water_bottle', patch_name='forest', clas
 
 
 
-Attack_Physics(mode='diff-pgd', bkg_name='laptop', patch_name='planda', classifier='resnet50', \
-                device=default_device, respace='ddim10', t=2, target=None, c_w=1, s_m=0.01, iter=default_iter, name='attack_physics')
+# Attack_Physics(mode='diff-pgd', bkg_name='laptop', patch_name='planda', classifier='resnet50', \
+#                 device=default_device, respace='ddim10', t=2, target=None, c_w=1, s_m=0.01, iter=default_iter, name='attack_physics')
 
 Attack_Physics(mode='diff-pgd', bkg_name='laptop', patch_name='planda', classifier='resnet50', \
                 device=default_device, respace='ddim10', t=2, target=531, c_w=1, s_m=0.01, iter=default_iter, name='attack_physics')
