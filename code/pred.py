@@ -1008,7 +1008,8 @@ d = {0: 'tench, Tinca tinca',
  996: 'hen-of-the-woods, hen of the woods, Polyporus frondosus, Grifola frondosa',
  997: 'bolete',
  998: 'ear, spike, capitulum',
- 999: 'toilet tissue, toilet paper, bathroom tissue'}
+ 999: 'toilet tissue, toilet paper, bathroom tissue',
+ 1000: 'suitcase, valise, luggage', }
 
 print('Label Predicted')
 y=net(load_png(args.p, 224)[None, ]).argmax(1).item()
