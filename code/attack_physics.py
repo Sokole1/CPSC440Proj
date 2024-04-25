@@ -193,6 +193,11 @@ def Attack_Physics(mode, bkg_name, patch_name, classifier, device, respace, t, t
         y_pred = 673 # mouse
         scale_range=(0.2, 0.3)
         margin=0.2
+    elif bkg_name == 'laptop':
+        bkg_dir = f'data/our_dataset/{bkg_name}/'
+        y_pred = 620
+        scale_range=(0.2, 0.3)
+        margin=0.1
     else:
         raise "Unavailable Background!"
 
@@ -281,6 +286,14 @@ def Attack_Physics(mode, bkg_name, patch_name, classifier, device, respace, t, t
 
 # Attack_Physics(mode='adv-patch', bkg_name='bag', patch_name='cat', classifier='resnet50', \
 #                 device=0, respace=None, t=None, target=187, c_w=0, s_m=0, iter=4000, name='attack_physics')
+
+
+
+Attack_Physics(mode='adv-patch', bkg_name='laptop', patch_name='planda', classifier='resnet50', \
+                device=0, respace=None, t=None, target=None, c_w=0, s_m=0, iter=1500, name='attack_physics')
+
+Attack_Physics(mode='adv-patch', bkg_name='laptop', patch_name='planda', classifier='resnet50', \
+                device=0, respace=None, t=None, target=531, c_w=0, s_m=0, iter=1500, name='attack_physics')
 ######################## adv-patch #####################################
 
 
@@ -291,12 +304,28 @@ def Attack_Physics(mode, bkg_name, patch_name, classifier, device, respace, t, t
 
 # Attack_Physics(mode='advcam', bkg_name='bag', patch_name='cat', classifier='resnet50', \
 #                 device=0, respace=None, t=None, target=187, c_w=1, s_m=0.01, iter=4000, name='attack_physics')
+
+
+
+Attack_Physics(mode='advcam', bkg_name='laptop', patch_name='planda', classifier='resnet50', \
+                device=0, respace=None, t=None, target=None, c_w=1, s_m=0.01, iter=4000, name='attack_physics')
+
+Attack_Physics(mode='advcam', bkg_name='laptop', patch_name='planda', classifier='resnet50', \
+                device=0, respace=None, t=None, target=531, c_w=1, s_m=0.01, iter=4000, name='attack_physics')
 # ######################## advcam #####################################
 
 
 
 
 ####################### diff-pgd #####################################
-Attack_Physics(mode='diff-pgd', bkg_name='computer_mouse', patch_name='apple', classifier='resnet50', \
+# Attack_Physics(mode='diff-pgd', bkg_name='computer_mouse', patch_name='apple', classifier='resnet50', \
+#                 device='cpu', respace='ddim10', t=2, target=None, c_w=1, s_m=0.01, iter=4000, name='attack_physics')
+
+
+
+Attack_Physics(mode='diff-pgd', bkg_name='laptop', patch_name='planda', classifier='resnet50', \
                 device='cpu', respace='ddim10', t=2, target=None, c_w=1, s_m=0.01, iter=4000, name='attack_physics')
+
+Attack_Physics(mode='diff-pgd', bkg_name='laptop', patch_name='planda', classifier='resnet50', \
+                device='cpu', respace='ddim10', t=2, target=531, c_w=1, s_m=0.01, iter=4000, name='attack_physics')
 ####################### diff-pgd #####################################
