@@ -16,8 +16,47 @@ import glob
 # import matplotlib.pylab as plt
 # import time
 # import glob
-
+import torch
+from image_captions import *
 # from attack_tools import gen_pgd_confs
+
+
+# def save_images():
+#     print(
+#         f"Results for image {exp_name}:\n \
+#             Original = {y_pred.item()} : {d_dict[y_pred.item()]}\n  \
+#             Adv Region = {x_adv_no_purify_pred} : {d_dict[x_adv_no_purify_pred]}\n  \
+#             Adv Purified Region = {y_final} : {d_dict[y_final]}"
+#     )
+
+#     print("SAVING TO", save_path + f"/{exp_name}_final{y_final}.png")
+#     si(
+#         torch.cat(
+#             [
+#                 torch.cat(
+#                     [
+#                         add_caption(x, f"O: {d_dict[y_pred.item()]}"),
+#                         #    add_caption(style_refer, f"T: {d_dict[target_pred]}"),
+#                         add_caption(style_refer, "Target (T)"),
+#                         add_caption(x_s, f"ST: {d_dict[x_s_pred]}"),
+#                         add_caption(
+#                             x_adv_diff_region,
+#                             f"Diff-PGD: {d_dict[x_adv_no_purify_pred]}",
+#                         ),
+#                         add_caption(
+#                             x_adv_diff_p_region, f"Purified: {d_dict[y_final]}"
+#                         ),
+#                         add_caption(mask, "mask"),
+
+#                         for x in
+#                     ],
+#                     -1,
+#                 )
+#             ],
+#             -2,
+#         ),
+#         save_path + f"/{exp_name}_final{y_final}.png",
+#     )
 
 def test_single_image(x, classifier, device, y, y_target=None, name='attack_physics'):
     classifier = get_archs(classifier, 'imagenet')
@@ -39,8 +78,8 @@ def test_single_image(x, classifier, device, y, y_target=None, name='attack_phys
                 Target = {y_target} : {d_dict[y_target]}")
 
     if y_target is not None:
-        return y_pred == y_target
-    return classifier(x).argmax(1) == y
+        return y_pred == y_target, y_pred
+    return classifier(x).argmax(1) == y, y_pred
 
 def load_physical_samples(device):
     bkg_dir = 'data/samples/physical/*/*/*/'
@@ -49,6 +88,7 @@ def load_physical_samples(device):
     bkg_all = glob.glob(bkg_dir+'/*.jpg')
     bkg_all += glob.glob(bkg_dir+'/*.png')
 
+    images = []
     for bkg_selected in bkg_all:
         path = bkg_selected.split('/')
         iterations = path[-4]
@@ -60,7 +100,16 @@ def load_physical_samples(device):
         adv_model = path[-2]
         print(path[-2])
         bkg = load_png(bkg_selected, 224)[None, ...].to(device)
-        test_single_image(bkg.clone(), 'resnet50', device, y=y, y_target=y_target, name=adv_model)
+        is_correct, y_pred = test_single_image(bkg.clone(), 'resnet50', device, y=y, y_target=y_target, name=adv_model)
+
+        images.append(
+            add_caption(
+                bkg,
+                f"{adv_model}: {d_dict[y_pred.item()]}",
+            )
+        )
+
+    si(images, './physical_samples.png')
 
 load_physical_samples('mps')
 bkg_dir = 'data/samples/physical/1400/'

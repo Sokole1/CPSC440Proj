@@ -1,5 +1,5 @@
 \documentclass{article}
-
+\usepackage{graphicx} % This line is necessary to use \includegraphics
 % if you need to pass options to natbib, use, e.g.:
 %     \PassOptionsToPackage{numbers, compress}{natbib}
 % before loading neurips_2019
@@ -21,6 +21,7 @@
 \usepackage[utf8]{inputenc} % allow utf-8 input
 \usepackage[T1]{fontenc}    % use 8-bit T1 fonts
 \usepackage{hyperref}       % hyperlinks
+\usepackage{cleveref}
 \usepackage{url}            % simple URL typesetting
 \usepackage{booktabs}       % professional-quality tables
 \usepackage{amsfonts}       % blackboard math symbols
@@ -66,36 +67,36 @@
 \end{abstract}
 
 
-\section*{\centering Reproducibility Summary}
+% \section*{\centering Reproducibility Summary}
 
-\textit{Template and style guide to \href{https://paperswithcode.com/rc2020}{ML Reproducibility Challenge 2020}. The following section of Reproducibility Summary is \textbf{mandatory}. This summary \textbf{must fit} in the first page, no exception will be allowed. When submitting your report in OpenReview, copy the entire summary and paste it in the abstract input field, where the sections must be separated with a blank line.
-}
+% \textit{Template and style guide to \href{https://paperswithcode.com/rc2020}{ML Reproducibility Challenge 2020}. The following section of Reproducibility Summary is \textbf{mandatory}. This summary \textbf{must fit} in the first page, no exception will be allowed. When submitting your report in OpenReview, copy the entire summary and paste it in the abstract input field, where the sections must be separated with a blank line.
+% }
 
-\subsection*{Scope of Reproducibility}
+% \subsection*{Scope of Reproducibility}
 
-State the main claim(s) of the original paper you are trying to reproduce (typically the main claim(s) of the paper).
-This is meant to place the work in context, and to tell a reader the objective of the reproduction.
+% State the main claim(s) of the original paper you are trying to reproduce (typically the main claim(s) of the paper).
+% This is meant to place the work in context, and to tell a reader the objective of the reproduction.
 
-\subsection*{Methodology}
+% \subsection*{Methodology}
 
-Briefly describe what you did and which resources you used. For example, did you use author's code? Did you re-implement parts of the pipeline? You can also use this space to list the hardware used, and the total budget (e.g. GPU hours) for the experiments.
+% Briefly describe what you did and which resources you used. For example, did you use author's code? Did you re-implement parts of the pipeline? You can also use this space to list the hardware used, and the total budget (e.g. GPU hours) for the experiments.
 
-\subsection*{Results}
+% \subsection*{Results}
 
-Start with your overall conclusion --- where did your results reproduce the original paper, and where did your results differ? Be specific and use precise language, e.g. "we reproduced the accuracy to within 1\% of reported value, which supports the paper's conclusion that it outperforms the baselines". Getting exactly the same number is in most cases infeasible, so you'll need to use your judgement to decide if your results support the original claim of the paper.
+% Start with your overall conclusion --- where did your results reproduce the original paper, and where did your results differ? Be specific and use precise language, e.g. "we reproduced the accuracy to within 1\% of reported value, which supports the paper's conclusion that it outperforms the baselines". Getting exactly the same number is in most cases infeasible, so you'll need to use your judgement to decide if your results support the original claim of the paper.
 
-\subsection*{What was easy}
+% \subsection*{What was easy}
 
-Describe which parts of your reproduction study were easy. For example, was it easy to run the author's code, or easy to re-implement their method based on the description in the paper? The goal of this section is to summarize to a reader which parts of the original paper they could easily apply to their problem.
+% Describe which parts of your reproduction study were easy. For example, was it easy to run the author's code, or easy to re-implement their method based on the description in the paper? The goal of this section is to summarize to a reader which parts of the original paper they could easily apply to their problem.
 
-\subsection*{What was difficult}
+% \subsection*{What was difficult}
 
-Describe which parts of your reproduction study were difficult or took much more time than you expected. Perhaps the data was not available and you couldn't verify some experiments, or the author's code was broken and had to be debugged first. Or, perhaps some experiments just take too much time/resources to run and you couldn't verify them. The purpose of this section is to indicate to the reader which parts of the original paper are either difficult to re-use, or require a significant amount of work and resources to verify.
+% Describe which parts of your reproduction study were difficult or took much more time than you expected. Perhaps the data was not available and you couldn't verify some experiments, or the author's code was broken and had to be debugged first. Or, perhaps some experiments just take too much time/resources to run and you couldn't verify them. The purpose of this section is to indicate to the reader which parts of the original paper are either difficult to re-use, or require a significant amount of work and resources to verify.
 
-\subsection*{Communication with original authors}
+% \subsection*{Communication with original authors}
 
-Briefly describe how much contact you had with the original authors (if any).
-\newpage
+% Briefly describe how much contact you had with the original authors (if any).
+% \newpage
 \textit{\textbf{The following section formatting is \textbf{optional}, you can also define sections as you deem fit.
 \\
 Focus on what future researchers or practitioners would find useful for reproducing or building upon the paper you choose.}}
@@ -105,15 +106,15 @@ A few sentences placing the work in high-level context. Limit it to a few paragr
 \section{Scope of reproducibility}
 \label{sec:claims}
 
-Introduce the specific setting or problem addressed in this work, and list the main claims from the original paper. Think of this as writing out the main contributions of the original paper. Each claim should be relatively concise; some papers may not clearly list their claims, and one must formulate them in terms of the presented experiments. (For those familiar, these claims are roughly the scientific hypotheses evaluated in the original work.)
+% Introduce the specific setting or problem addressed in this work, and list the main claims from the original paper. Think of this as writing out the main contributions of the original paper. Each claim should be relatively concise; some papers may not clearly list their claims, and one must formulate them in terms of the presented experiments. (For those familiar, these claims are roughly the scientific hypotheses evaluated in the original work.)
 
-A claim should be something that can be supported or rejected by your data. An example is, ``Finetuning pretrained BERT on dataset X will have higher accuracy than an LSTM trained with GloVe embeddings.''
-This is concise, and is something that can be supported by experiments.
-An example of a claim that is too vague, which can't be supported by experiments, is ``Contextual embedding models have shown strong performance on a number of tasks. We will run experiments evaluating two types of contextual embedding models on datasets X, Y, and Z."
+% A claim should be something that can be supported or rejected by your data. An example is, ``Finetuning pretrained BERT on dataset X will have higher accuracy than an LSTM trained with GloVe embeddings.''
+% This is concise, and is something that can be supported by experiments.
+% An example of a claim that is too vague, which can't be supported by experiments, is ``Contextual embedding models have shown strong performance on a number of tasks. We will run experiments evaluating two types of contextual embedding models on datasets X, Y, and Z."
 
 % This section roughly tells a reader what to expect in the rest of the report. Clearly itemize the claims you are testing:
 
-We investigate the main claims from the original paper, which are:
+The main claims from the original paper are as follows:
 \begin{enumerate}
     % \item Diffusion-Based Projected Gradient Descent (Diff-PGD) generates realistic adversarial samples
     \item Diff-PGD can be applied to specific tasks such as digital attacks, physical-world attacks, and style-based attacks, outperforming baseline methods such as PGD, AdvPatch, and AdvCam.
@@ -125,23 +126,30 @@ We investigate the main claims from the original paper, which are:
     % \item Diff-rPGD generates images that are more stealthy compared to rPGD-generated samples for digital attacks.
 \end{enumerate}
 
-Each experiment in Section~\ref{sec:results} will support (at least) one of these claims, so a reader of your report should be able to separately understand the \emph{claims} and the \emph{evidence} that supports them.
+We will be exploring the first claim in regards to physical-world~\ref{sec:results} and style-based attacks~\ref{sec:results} specifically.
+
+% Each experiment in Section~\ref{sec:results} will support (at least) one of these claims, so a reader of your report should be able to separately understand the \emph{claims} and the \emph{evidence} that supports them.
 
 %\jdcomment{To organizers: I asked my students to connect the main claims and the experiments that supported them. For example, in this list above they could have ``Claim 1, which is supported by Experiment 1 in Figure 1.'' The benefit was that this caused the students to think about what their experiments were showing (as opposed to blindly rerunning each experiment and not considering how it fit into the overall story), but honestly it seemed hard for the students to understand what I was asking for.}
 
 \section{Methodology}
-Explain your approach - did you use the author's code, or did you aim to re-implement the approach from the description in the paper? Summarize the resources (code, documentation, GPUs) that you used.
+
+We used the authors' code, however, since not all parts of the authors' code have been released, we wrote our own code to evaluate a lot of the experiments.
+
+% Explain your approach - did you use the author's code, or did you aim to re-implement the approach from the description in the paper? Summarize the resources (code, documentation, GPUs) that you used.
 
 \subsection{Model descriptions}
-Include a description of each model or algorithm used. Be sure to list the type of model, the number of parameters, and other relevant info (e.g. if it's pretrained).
+We used ResNet-50, ResNet-101, ResNet-18, Wide-ResNet-50, and Wide-ResNet-101 to classify images. The parameter `weights` was set to the default weight for each model.
 
 \subsection{Datasets}
-For each dataset include 1) relevant statistics such as the number of examples and label distributions, 2) details of train / dev / test splits, 3) an explanation of any preprocessing done, and 4) a link to download the data (if available).
+% For each dataset include 1) relevant statistics such as the number of examples and label distributions, 2) details of train / dev / test splits, 3) an explanation of any preprocessing done, and 4) a link to download the data (if available).
 
 The original paper used ImageNet, but due to limitations in compute and memory, we used a smaller subset of ImageNet with 1000 samples: \url{https://www.kaggle.com/datasets/ifigotin/imagenetmini-1000}
 
 \subsection{Hyperparameters}
 Describe how the hyperparameter values were set. If there was a hyperparameter search done, be sure to include the range of hyperparameters searched over, the method used to search (e.g. manual search, random search, Bayesian optimization, etc.), and the best hyperparameters found. Include the number of total experiments (e.g. hyperparameter trials). You can also include all results from that search (not just the best-found results).
+
+
 
 \subsection{Experimental setup and code}
 Include a description of how the experiments were set up that's clear enough a reader could replicate the setup.
@@ -151,11 +159,18 @@ Provide a link to your code.
 We ran the code given by the authors.
 We copied the hyperparameter setup of the authors.\\
 
-Physical-World Attacks:\\
-We first tried the one of the attacks created by the authors, which was a computer-mouse.\\
-We then tried our own physical world attack using an image patch of a ... and a ... as our target object.\\
-We use an (type of phone here, ex. iPhone 8-Plus) to take images from the real world and use an (type of printer here, ex. HP DeskJet-2752) to print the image in color.\\
-We stuck the original image on ..., and classified it using all 5 classifiers (R50, R101, R18, WR50, WR101)
+\subsubsection{Success Attack Rate}
+We wrote our own code to test success rate in \url{attack_global.py}.
+We used the same hyperparameters for running Attack\_Global as the authors, except that we chose to use skip=20, to use 78 images per iteration to test success rate.
+If the adversarial sample caused the model to classify the image as anything other than it's original classification, we considered it a successful attack.\\
+
+\subsubsection{Physical-World Attacks}
+% We first tried the one of the attacks created by the authors, which was a computer-mouse.\\
+We tried our own physical world attack using an image patch of a digitally drawn panda head and a laptop as our target object.\\
+
+We use a Galaxy A53 5G to take images from the real world and used a MP C4505ex Color Laser Multifunction Printer to print the images in color.\\
+
+We stuck the original image on ..., and classified it using ResNet-50.
 
 We tested for Success Attack Rate of Diff-PGD using 250 uniformly sampled images from our dataset. (See figure ...)\\
 The code for the figure in the paper was not provided, so we created our own code to generate the figure.\\
@@ -193,7 +208,40 @@ For each experiment, say 1) which claim in Section~\ref{sec:claims} it supports,
 For example, an experiment training and evaluating a model on a dataset may support a claim that that model outperforms some baseline.
 Logically group related results into sections.
 
-\subsubsection{Result 1}
+skip=20
+
+\subsubsection{Attack success rate}
+\begin{figure}
+  \centering
+  % The next line would normally be \includegraphics instead.
+  \includegraphics[scale=0.8]{figures/attack_global_gradpass_success_rate.png}
+
+  \caption{
+    Blue line is success rate of classifying an image not attacked.
+    Orange line is success rate of causing a different classification with Diff-PGD.
+    Green line is success rate of causing a different classification with Diff-PGD after applying sdedit at the end (purification???).
+  }
+  \label{fig:attack_success_rate}
+\end{figure}
+
+We got a very different result for success rate from that of the original paper (\cref{fig:attack_success_rate}). In the original paper, the success rate of all of the attacks reached 100\% after 5 iterations.
+However, in our case the success rate reached only 60\%-80\% after 15 iterations.\\
+Since the authors have yet to release their code for success rate, we are unsure what caused this difference. We did use a different dataset than the authors, this could be a possible reason.\\
+
+\subsubsection{Physical-World Attacks}
+To verify that Diff-PGD can be applied to physical-world attacks, we tried an attack a laptop as our target object.
+
+
+We used a laptop as our target object and printed out an image of a laptop. We then stuck the image on a laptop and classified it using all 5 classifiers. We found that the attack was successful for all 5 classifiers. This supports the claim that Diff-PGD can be applied to physical-world attacks.
+
+We present the result of physical world attacks using adversarial patches
+generated using Diff-PGD in the main paper. In order to show that the adversarial patches are robust
+to camera views, we show more images taken from different camera views in Figure 16. For the
+two cases: computer mouse (untargeted) and back bag (targeted to Yorkshire Terrier), we randomly
+sample ten other camera views. The results show that the adversarial patches are robust both for
+targeted settings and untargeted settings. For targteted settings, our adversarial patch can fool the
+network to predict back bag as terriers, and for untargeted settings, the adversarial patch misleads the
+network to predict computer mouse as artichoke
 
 \subsubsection{Result 2}
 
@@ -217,6 +265,11 @@ List part of the reproduction study that took more time than you anticipated or 
 
 Be careful to put your discussion in context. For example, don't say "the maths was difficult to follow", say "the math requires advanced knowledge of calculus to follow".
 
+The physical-world attack was a lot more difficult to reproduce than we anticipated. AdvCam and AdvPatch both ran fairly quickly, averaging around 2-3s per iteration. However, Diff-PGD averaged around 60s per iteration, which took multiple days to run.
+Because of this, instead of running 4000 iterations as was done in the original paper, we only ran 1500 iterations for each image.\\
+None of the models were able to perturb the classification of the image, which was likely due to the fact that we did not adjust the scale properly.
+This likely means that hyperparameter tuning is very important for physical-world attacks. However, tuning the model is more challenging for Diff-PGD for physical-world attacks, due to how slowly it runs.
+
 \subsection{Communication with original authors}
 Document the extent of (or lack of) communication with the original authors. To make sure the reproducibility report is a fair assessment of the original research we recommend getting in touch with the original authors. You can ask authors specific questions, or if you don't have any questions you can send them the full report to get their feedback before it gets published.
 
@@ -224,5 +277,10 @@ Document the extent of (or lack of) communication with the original authors. To 
 
 \section*{References}
 
+\appendix
+
+\section{Supplementary material} \label{app:info}
+
+\subsection{Physical attacks}
 
 \end{document}
