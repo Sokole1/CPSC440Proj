@@ -291,7 +291,7 @@ def Test_Success_Rate(classifier, device, respace, t=3, eps=16, iter=15, name='a
 # # Print or process the loaded contents
 # print(loaded_pkg)
 
-Test_Success_Rate('resnet50', 'mps', 'ddim50', t=3, eps=16, iter=15, name='attack_global_gradpass', alpha=2, version='v2')
+Test_Success_Rate('resnet50', 'mps', 'ddim50', t=3, eps=16, iter=15, name='attack_global_gradpass', alpha=2, version='v2', skip=50)
 # Attack_Global('resnet50', 0, 'ddim50', t=3, eps=16, iter=10, name='attack_global_gradpass', alpha=2
 
 # Attack_Global('resnet50', 0, 'ddim40', t=3, eps=16, iter=10, name='attack_global_gradpass', alpha=4)

@@ -26,6 +26,7 @@ def load_physical_samples(device):
 
     for bkg_selected in bkg_all:
         bkg = load_png(bkg_selected, 224)[None, ...].to(device)
+        test_single_image(bkg.clone(), 'resnet50', device, 0)
 
 # def Test_Physics(image_path, classifier, device, y_pred, y_target=None, name='attack_physics'):
 #     classifier = get_archs(classifier, 'imagenet')
