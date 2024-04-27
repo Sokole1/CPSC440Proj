@@ -201,8 +201,8 @@ def Attack_Physics(mode, bkg_name, patch_name, classifier, device, respace, t, t
     elif bkg_name == 'water_bottle':
         bkg_dir = f'data/our_dataset/{bkg_name}/'
         y_pred = 898
-        scale_range=(0.2, 0.3)
-        margin=0.3
+        scale_range=(0.05, 0.15)
+        margin=0.4
     else:
         raise "Unavailable Background!"
 
@@ -318,11 +318,11 @@ default_device = 'cpu'
 # Attack_Physics(mode='advcam', bkg_name='laptop', patch_name='planda', classifier='resnet50', \
 #                 device=default_device, respace=None, t=None, target=None, c_w=1, s_m=0.01, iter=default_iter, name='attack_physics')
 
-Attack_Physics(mode='advcam', bkg_name='laptop', patch_name='planda', classifier='resnet50', \
-                device=default_device, respace=None, t=None, target=531, c_w=1, s_m=0.01, iter=default_iter, name='attack_physics')
+# Attack_Physics(mode='advcam', bkg_name='laptop', patch_name='planda', classifier='resnet50', \
+#                 device=default_device, respace=None, t=None, target=531, c_w=1, s_m=0.01, iter=default_iter, name='attack_physics')
 
-Attack_Physics(mode='advcam', bkg_name='water_bottle', patch_name='forest', classifier='resnet50', \
-                device=default_device, respace=None, t=None, target=None, c_w=1, s_m=0.01, iter=default_iter, name='attack_physics')
+# Attack_Physics(mode='advcam', bkg_name='water_bottle', patch_name='forest', classifier='resnet50', \
+#                 device=default_device, respace=None, t=None, target=None, c_w=1, s_m=0.01, iter=default_iter, name='attack_physics')
 # ######################## advcam #####################################
 
 
@@ -337,9 +337,29 @@ Attack_Physics(mode='advcam', bkg_name='water_bottle', patch_name='forest', clas
 # Attack_Physics(mode='diff-pgd', bkg_name='laptop', patch_name='planda', classifier='resnet50', \
 #                 device=default_device, respace='ddim10', t=2, target=None, c_w=1, s_m=0.01, iter=default_iter, name='attack_physics')
 
-Attack_Physics(mode='diff-pgd', bkg_name='laptop', patch_name='planda', classifier='resnet50', \
-                device=default_device, respace='ddim10', t=2, target=531, c_w=1, s_m=0.01, iter=default_iter, name='attack_physics')
+# Attack_Physics(mode='diff-pgd', bkg_name='laptop', patch_name='planda', classifier='resnet50', \
+#                 device=default_device, respace='ddim10', t=2, target=531, c_w=1, s_m=0.01, iter=default_iter, name='attack_physics')
 
 Attack_Physics(mode='diff-pgd', bkg_name='water_bottle', patch_name='forest', classifier='resnet50', \
                 device=default_device, respace='ddim10', t=2, target=None, c_w=1, s_m=0.01, iter=default_iter, name='attack_physics')
 ####################### diff-pgd #####################################
+
+
+def Test_Physics(image_path, classifier, device, y_pred, y_target=None, name='attack_physics'):
+    classifier = get_archs(classifier, 'imagenet')
+
+    classifier = classifier.to(device)
+    classifier.eval()
+    # load image from image_path to classify image
+    x = load_png(image_path, 224)[None, ].to(device)
+    # print(name)
+    print(classifier(x).argmax(1))
+    out = classifier(x)
+    loss = out[:, y_pred]
+
+    if y_target is not None:
+        loss -= out[:, y_target]
+
+    loss.backward()
+
+    # loss_l.append(loss.item())

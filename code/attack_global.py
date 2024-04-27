@@ -25,34 +25,34 @@ class Denoised_Classifier(torch.nn.Module):
         self.model = model
         self.classifier = classifier
         self.t = t
-    
+
     def sdedit(self, x, t, to_01=True):
 
         # assume the input is 0-1
         t_int = t
-        
+
         x = x * 2 - 1
-        
+
         t = torch.full((x.shape[0], ), t).long().to(x.device)
-    
-        x_t = self.diffusion.q_sample(x, t) 
-        
+
+        x_t = self.diffusion.q_sample(x, t)
+
         sample = x_t
-    
+
         # print(x_t.min(), x_t.max())
-    
+
         # si(x_t, 'vis/noised_x.png', to_01=True)
-        
+
         indices = list(range(t+1))[::-1]
 
-        
-        # visualize 
+
+        # visualize
         l_sample=[]
         l_predxstart=[]
 
         for i in indices:
 
-            # out = self.diffusion.ddim_sample(self.model, sample, t)           
+            # out = self.diffusion.ddim_sample(self.model, sample, t)
             out = self.diffusion.ddim_sample(self.model, sample, torch.full((x.shape[0], ), i).long().to(x.device))
 
 
@@ -61,8 +61,8 @@ class Denoised_Classifier(torch.nn.Module):
 
             l_sample.append(out['sample'])
             l_predxstart.append(out['pred_xstart'])
-        
-        
+
+
         # visualize
         si(torch.cat(l_sample), 'l_sample.png', to_01=1)
         si(torch.cat(l_predxstart), 'l_pxstart.png', to_01=1)
@@ -70,44 +70,44 @@ class Denoised_Classifier(torch.nn.Module):
         # the output of diffusion model is [-1, 1], should be transformed to [0, 1]
         if to_01:
             sample = (sample + 1) / 2
-        
+
         return sample
-        
-    
+
+
     def forward(self, x):
-        
+
         out = self.sdedit(x, self.t)# [0, 1]
         out = self.classifier(out)
         return out
-    
+
 
 
 def generate_x_adv_denoised(x, y, diffusion, model, classifier, pgd_conf, device, t):
-    
-    
+
+
     net = Denoised_Classifier(diffusion, model, classifier, t)
-    
-    
+
+
     adversary = LinfPGDAttack(  net,
-                                loss_fn=torch.nn.CrossEntropyLoss(reduction="sum"), 
+                                loss_fn=torch.nn.CrossEntropyLoss(reduction="sum"),
                                 eps=pgd_conf['eps'],
-                                nb_iter=pgd_conf['iter'], 
-                                eps_iter=pgd_conf['alpha'], 
-                                rand_init=True, 
+                                nb_iter=pgd_conf['iter'],
+                                eps_iter=pgd_conf['alpha'],
+                                rand_init=True,
                                 targeted=False
                                 )
-    
+
     x_adv = adversary.perturb(x, y)
-    
+
     return x_adv
 
 @torch.no_grad()
 def generate_x_adv_denoised_v2(x, y, diffusion, model, classifier, pgd_conf, device, t):
-    
-    
+
+
     net = Denoised_Classifier(diffusion, model, classifier, t)
 
-    
+
     delta = torch.zeros(x.shape).to(x.device)
     # delta.requires_grad_()
 
@@ -117,10 +117,10 @@ def generate_x_adv_denoised_v2(x, y, diffusion, model, classifier, pgd_conf, dev
     alpha = pgd_conf['alpha']
     iter = pgd_conf['iter']
 
-    
+
 
     for pgd_iter_id in range(iter):
-        
+
         x_diff = net.sdedit(x+delta, t).detach()
 
         x_diff.requires_grad_()
@@ -138,14 +138,14 @@ def generate_x_adv_denoised_v2(x, y, diffusion, model, classifier, pgd_conf, dev
         delta = torch.clamp(delta, -eps, eps)
     print("Done")
 
-    x_adv = torch.clamp(x+delta, 0, 1)    
+    x_adv = torch.clamp(x+delta, 0, 1)
     return x_adv.detach()
 
 
 
 def Attack_Global(classifier, device, respace, t, eps=16, iter=10, name='attack_global', alpha=2, version='v1', skip=200):
-    
-    
+
+
     pgd_conf = gen_pgd_confs(eps=eps, alpha=alpha, iter=iter, input_range=(0, 1))
 
     save_path = f'vis/{name}_{version}/{classifier}_eps{eps}_iter{iter}_{respace}_t{t}/'
@@ -153,20 +153,25 @@ def Attack_Global(classifier, device, respace, t, eps=16, iter=10, name='attack_
     mp(save_path)
 
 
-    
+
     classifier = get_archs(classifier, 'imagenet')
-    
+
     classifier = classifier.to(device)
     classifier.eval()
-    
+
     dataset = get_dataset(
         'imagenet', split='test'
     )
-    
-    dataset = Subset(dataset, indices=np.arange(1)) # for testing, just use 2.
+
+    # dataset = Subset(dataset, indices=np.arange(1)) # for testing, just use 2.
+    print("dataset len", dataset.__len__())
 
     model, diffusion = get_imagenet_dm_conf(device=device, respace=respace, model_path='./ckpt/256x256_diffusion_uncond.pt')
-    
+
+    num_og_success = 0
+    num_adv_success = 0
+    num_adv_diff_success = 0
+
     c = 0
 
     for i in tqdm(range(dataset.__len__())):
@@ -179,7 +184,7 @@ def Attack_Global(classifier, device, respace, t, eps=16, iter=10, name='attack_
         x, y = dataset[i]
         x = x[None, ].to(device)
         y = torch.tensor(y)[None, ].to(device)
-        
+
         y_pred = classifier(x).argmax(1) # original prediction
 
         if version == 'v1':
@@ -190,9 +195,9 @@ def Attack_Global(classifier, device, respace, t, eps=16, iter=10, name='attack_
         cprint('time: {:.3}'.format(time.time() - time_st), 'g')
 
         with torch.no_grad():
-        
+
             net = Denoised_Classifier(diffusion, model, classifier, t)
-        
+
             pred_x0 = net.sdedit(x_adv, t)
 
         pkg = {
@@ -206,13 +211,45 @@ def Attack_Global(classifier, device, respace, t, eps=16, iter=10, name='attack_
 
         print(x_adv.min(), x_adv.max(), (x-x_adv).abs().max())
 
-        
+
         torch.save(pkg, save_path+f'{i}.bin')
         si(torch.cat([x, x_adv, pred_x0], -1), save_path + f'{i}.png')
-        print(y_pred, classifier(x_adv).argmax(1), classifier(pred_x0).argmax(1))
+
+        if (classifier(x).argmax(1) != y).item():
+            num_og_success += 1
+        if (classifier(x_adv).argmax(1) != y).item():
+            num_adv_success += 1
+        if (classifier(pred_x0).argmax(1) != y).item():
+            num_adv_diff_success += 1
+
+        print(i, y, y_pred, classifier(x_adv).argmax(1), classifier(pred_x0).argmax(1))
 
 
         c += 1
+
+    return  num_og_success / c, num_adv_success / c, num_adv_diff_success / c
+
+
+# def Attack_Global(classifier, device, respace, t, eps=16, iter=10, name='attack_global', alpha=2, version='v1', skip=200):
+def Test_Success_Rate(classifier, device, respace, t=3, eps=16, iter=10, name='attack_global_gradpass', alpha=2, version='v1', skip=200):
+    save_path = f'vis/{name}_{version}/{classifier}_eps{eps}_iter{iter}_{respace}_t{t}/'
+    mp(save_path)
+
+    scores_og = []
+    scores_adv = []
+    scores_adv_diff = []
+    iters = range(1, iter+1)
+    for i in iters:
+        og, adv, adv_diff = Attack_Global(classifier, device, respace, t=t, eps=eps, iter=i, name=name, alpha=alpha, version=version, skip=skip)
+        scores_og.append(og)
+        scores_adv.append(adv)
+        scores_adv_diff.append(adv_diff)
+
+    plt.plot(iters, scores_og, label='og')
+    plt.plot(iters, scores_adv, label='adv')
+    plt.plot(iters, scores_adv_diff, label='adv_diff')
+    plt.savefig(save_path + f'{name}_success_rate.png')
+    plt.close()
 
 # Attack_Global('resnet101', 1, 'ddim100', t=2, eps=16, iter=1)
 
@@ -249,7 +286,7 @@ def Attack_Global(classifier, device, respace, t, eps=16, iter=10, name='attack_
 # # Print or process the loaded contents
 # print(loaded_pkg)
 
-Attack_Global('resnet50', 'mps', 'ddim50', t=3, eps=16, iter=10, name='attack_global_gradpass', alpha=2, version='v2')
+Test_Success_Rate('resnet50', 'mps', 'ddim50', t=3, eps=16, iter=10, name='attack_global_gradpass', alpha=2, version='v2')
 # Attack_Global('resnet50', 0, 'ddim50', t=3, eps=16, iter=10, name='attack_global_gradpass', alpha=2
 
 # Attack_Global('resnet50', 0, 'ddim40', t=3, eps=16, iter=10, name='attack_global_gradpass', alpha=4)
@@ -262,4 +299,3 @@ Attack_Global('resnet50', 'mps', 'ddim50', t=3, eps=16, iter=10, name='attack_gl
 
 # Attack_Global('resnet50', 1, 'ddim30', t=2, eps=16, iter=10, name='attack_global_new')
 # Attack_Global('resnet50', 1, 'ddim20', t=2, eps=16, iter=10, name='attack_global_new')
-
