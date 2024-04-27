@@ -1010,6 +1010,7 @@ d = {0: 'tench, Tinca tinca',
  998: 'ear, spike, capitulum',
  999: 'toilet tissue, toilet paper, bathroom tissue', }
 
-print('Label Predicted')
-y=net(load_png(args.p, 224)[None, ]).argmax(1).item()
-print(y, d[y])
+if args.p is not None:
+    print('Label Predicted')
+    y=net(load_png(args.p, 224)[None, ]).argmax(1).item()
+    print(y, d[y])
