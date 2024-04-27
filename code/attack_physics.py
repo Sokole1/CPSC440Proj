@@ -195,7 +195,7 @@ def Attack_Physics(mode, bkg_name, patch_name, classifier, device, respace, t, t
         margin=0.2
     elif bkg_name == 'laptop':
         bkg_dir = f'data/our_dataset/{bkg_name}/'
-        y_pred = 620
+        y_pred = 681
         scale_range=(0.2, 0.3)
         margin=0.1
     elif bkg_name == 'water_bottle':
@@ -318,11 +318,11 @@ default_device = 'cpu'
 # Attack_Physics(mode='advcam', bkg_name='laptop', patch_name='planda', classifier='resnet50', \
 #                 device=default_device, respace=None, t=None, target=None, c_w=1, s_m=0.01, iter=default_iter, name='attack_physics')
 
-# Attack_Physics(mode='advcam', bkg_name='laptop', patch_name='planda', classifier='resnet50', \
-#                 device=default_device, respace=None, t=None, target=531, c_w=1, s_m=0.01, iter=default_iter, name='attack_physics')
+Attack_Physics(mode='advcam', bkg_name='laptop', patch_name='planda', classifier='resnet50', \
+                device=default_device, respace=None, t=None, target=531, c_w=1, s_m=0.01, iter=4000, name='attack_physics')
 
-# Attack_Physics(mode='advcam', bkg_name='water_bottle', patch_name='forest', classifier='resnet50', \
-#                 device=default_device, respace=None, t=None, target=None, c_w=1, s_m=0.01, iter=default_iter, name='attack_physics')
+Attack_Physics(mode='advcam', bkg_name='water_bottle', patch_name='forest', classifier='resnet50', \
+                device=default_device, respace=None, t=None, target=None, c_w=1, s_m=0.01, iter=4000, name='attack_physics')
 # ######################## advcam #####################################
 
 
@@ -340,8 +340,8 @@ default_device = 'cpu'
 # Attack_Physics(mode='diff-pgd', bkg_name='laptop', patch_name='planda', classifier='resnet50', \
 #                 device=default_device, respace='ddim10', t=2, target=531, c_w=1, s_m=0.01, iter=default_iter, name='attack_physics')
 
-Attack_Physics(mode='diff-pgd', bkg_name='water_bottle', patch_name='forest', classifier='resnet50', \
-                device=default_device, respace='ddim10', t=2, target=None, c_w=1, s_m=0.01, iter=default_iter, name='attack_physics')
+# Attack_Physics(mode='diff-pgd', bkg_name='water_bottle', patch_name='forest', classifier='resnet50', \
+#                 device=default_device, respace='ddim10', t=2, target=None, c_w=1, s_m=0.01, iter=default_iter, name='attack_physics')
 ####################### diff-pgd #####################################
 
 
