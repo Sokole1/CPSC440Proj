@@ -215,11 +215,11 @@ def Attack_Global(classifier, device, respace, t, eps=16, iter=10, name='attack_
         torch.save(pkg, save_path+f'{i}.bin')
         si(torch.cat([x, x_adv, pred_x0], -1), save_path + f'{i}.png')
 
-        if (classifier(x).argmax(1) != y).item():
+        if (classifier(x).argmax(1) == y_pred).item():
             num_og_success += 1
-        if (classifier(x_adv).argmax(1) != y).item():
+        if (classifier(x_adv).argmax(1) != y_pred).item():
             num_adv_success += 1
-        if (classifier(pred_x0).argmax(1) != y).item():
+        if (classifier(pred_x0).argmax(1) != y_pred).item():
             num_adv_diff_success += 1
 
         print(i, y, y_pred, classifier(x_adv).argmax(1), classifier(pred_x0).argmax(1))
@@ -231,25 +231,30 @@ def Attack_Global(classifier, device, respace, t, eps=16, iter=10, name='attack_
 
 
 # def Attack_Global(classifier, device, respace, t, eps=16, iter=10, name='attack_global', alpha=2, version='v1', skip=200):
-def Test_Success_Rate(classifier, device, respace, t=3, eps=16, iter=10, name='attack_global_gradpass', alpha=2, version='v1', skip=200):
-    save_path = f'vis/{name}_{version}/{classifier}_eps{eps}_iter{iter}_{respace}_t{t}/'
+def Test_Success_Rate(classifier, device, respace, t=3, eps=16, iter=15, name='attack_global_gradpass', alpha=2, version='v1', skip=200):
+    save_path = f'vis/{name}_{version}/test/{classifier}_eps{eps}_{respace}_t{t}/'
     mp(save_path)
 
     scores_og = []
     scores_adv = []
     scores_adv_diff = []
-    iters = range(1, iter+1)
-    for i in iters:
+    for i in range(1, iter+1):
         og, adv, adv_diff = Attack_Global(classifier, device, respace, t=t, eps=eps, iter=i, name=name, alpha=alpha, version=version, skip=skip)
         scores_og.append(og)
         scores_adv.append(adv)
         scores_adv_diff.append(adv_diff)
 
-    plt.plot(iters, scores_og, label='og')
-    plt.plot(iters, scores_adv, label='adv')
-    plt.plot(iters, scores_adv_diff, label='adv_diff')
-    plt.savefig(save_path + f'{name}_success_rate.png')
-    plt.close()
+        iters = range(1, i+1)
+        plt.plot(iters, scores_og, label='og')
+        plt.plot(iters, scores_adv, label='adv')
+        plt.plot(iters, scores_adv_diff, label='adv_diff')
+
+        plt.xlabel('# Iterations')
+        plt.ylabel('Success Attack Rate')
+        plt.legend()
+
+        plt.savefig(save_path + f'{name}_success_rate.png')
+        plt.close()
 
 # Attack_Global('resnet101', 1, 'ddim100', t=2, eps=16, iter=1)
 
@@ -286,7 +291,7 @@ def Test_Success_Rate(classifier, device, respace, t=3, eps=16, iter=10, name='a
 # # Print or process the loaded contents
 # print(loaded_pkg)
 
-Test_Success_Rate('resnet50', 'mps', 'ddim50', t=3, eps=16, iter=10, name='attack_global_gradpass', alpha=2, version='v2')
+Test_Success_Rate('resnet50', 'mps', 'ddim50', t=3, eps=16, iter=15, name='attack_global_gradpass', alpha=2, version='v2')
 # Attack_Global('resnet50', 0, 'ddim50', t=3, eps=16, iter=10, name='attack_global_gradpass', alpha=2
 
 # Attack_Global('resnet50', 0, 'ddim40', t=3, eps=16, iter=10, name='attack_global_gradpass', alpha=4)
