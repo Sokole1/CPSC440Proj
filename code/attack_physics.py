@@ -196,7 +196,7 @@ def Attack_Physics(mode, bkg_name, patch_name, classifier, device, respace, t, t
     elif bkg_name == 'laptop':
         bkg_dir = f'data/our_dataset/{bkg_name}/'
         y_pred = 681
-        scale_range=(0.2, 0.3)
+        scale_range=(0.1, 0.15)
         margin=0.1
     elif bkg_name == 'water_bottle':
         bkg_dir = f'data/our_dataset/{bkg_name}/'
