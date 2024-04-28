@@ -27,9 +27,16 @@
 \usepackage{amsfonts}       % blackboard math symbols
 \usepackage{nicefrac}       % compact symbols for 1/2, etc.
 \usepackage{microtype}      % microtypography
+\usepackage{float}
 
 \usepackage[dvipsnames]{xcolor}
 \usepackage[normalem]{ulem}
+
+\usepackage[style=authoryear,maxbibnames=30]{biblatex}
+\addbibresource{references.bib}
+\renewbibmacro{in:}{}  % drops a silly "In:" from biblatex format
+\let\citet\textcite    % I do this alias because I/others find it more familiar, idk.
+\let\citep\parencite   % biblatex also has a natbib option to make these,
 \newif{\ifhidecomments}
 
 
@@ -45,7 +52,7 @@
 
 
 \author{%
-  William Kang,
+  William Kang
   \\
   \texttt{wkang01@student.ubc.ca}
   \And
@@ -58,14 +65,14 @@
 \maketitle
 
 \begin{abstract}
-  We are doing a reproducibility report based on the paper "Diffusion-Based Adversarial Sample Generation for Improved Stealthiness and Controllability" by Haotian Xue, Alexandre Araujo, Bin Hu, Yongxin Chen. Their Github Repo is here: \url{https://github.com/xavihart/Diff-PGD/tree/main}.
-
+  We are doing a reproducibility report based on the paper "Diffusion-Based Adversarial Sample Generation for Improved Stealthiness and Controllability" by Haotian Xue, Alexandre Araujo, Bin Hu, Yongxin Chen.
   The paper uses a novel framework to generate adversarial samples. They use a gradient based method guided by a pre-trained diffusion model to try to generate images that appear realistic to the human eye, can fool a wide range of models, and is easy to control how certain regions are modified.
-
-  In particular, we are evaluating the claims that Diff-PGD outperform baseline methods such as PGD, AdvPatch, and AdvCam in physical-world attacks and style-based attacks specifically.
-  Finally, we are evaluating the claim that Diff-PGD generates adversarial samples with higher stealthiness.
+  We find that attacks have to be carefully created, with the right hyper-parameters, and target images, in order to get results similar to the original paper.
 \end{abstract}
 
+% In particular, we are evaluating the claims that Diffusion-Based Projected Gradient Descent (Diff-PGD) outperform baseline methods such as PGD, AdvPatch, and AdvCam in physical-world attacks and style-based attacks specifically.
+% In particular, we are evaluating the claims that Diffusion-Based Projected Gradient Descent (Diff-PGD) outperform baseline methods to generate adversarial samples.
+% Along with evaluating the claim that Diff-PGD generates adversarial samples that are easy to customize, yet hard to detect with the human eye.
 
 % \section*{\centering Reproducibility Summary}
 
@@ -97,9 +104,6 @@
 
 % Briefly describe how much contact you had with the original authors (if any).
 % \newpage
-\textit{\textbf{The following section formatting is \textbf{optional}, you can also define sections as you deem fit.
-\\
-Focus on what future researchers or practitioners would find useful for reproducing or building upon the paper you choose.}}
 \section{Introduction}
 % A few sentences placing the work in high-level context. Limit it to a few paragraphs at most; your report is on reproducing a piece of work, you don’t have to motivate that work.
 
@@ -107,8 +111,8 @@ Neural networks are remarkably good at tasks such as image classification. Howev
 These perturbed samples are called adversarial samples, and are a major security concern for systems that use neural networks.
 There are various types of adversarial attacks, including global attacks, which perturb any part of the image, regional attacks, which change a specified region of an image, style-based attacks, which change an image region based on a reference image, and physical world attacks, which generates images you can print out and place on a physical object which cause the physical object to be misclassified by an image classifier.
 
-The authors of the original paper propose a new method for generating adversarial models, that uses an off-the-shelf diffusion model to help guide the generation of the perturbations in the image, called Diff-PGD.
-This method aims to create adversarial samples that are more realistic, and harder to detect by the human eye, compared to baseline methods, and can be applied to various types of attacks, such as digital attacks, physical-world attacks, and style-based attacks.\\
+The authors of the original paper propose a new method for generating adversarial models, that uses an off-the-shelf diffusion model to help guide the generation of the perturbations in the image, called Diff-PGD \citep{xue2023diffusion}.
+This method aims to create adversarial samples that are more realistic, and harder to detect by the human eye, compared to baseline methods, and can be applied to various types of attacks, such as digital attacks, physical-world attacks, and style-based attacks.
 
 
 
@@ -126,7 +130,7 @@ This method aims to create adversarial samples that are more realistic, and hard
 The main claims from the original paper are as follows:
 \begin{enumerate}
     % \item Diffusion-Based Projected Gradient Descent (Diff-PGD) generates realistic adversarial samples
-    \item Diff-PGD can be applied to specific tasks such as digital attacks, physical-world attacks, and style-based attacks, outperforming baseline methods such as PGD, AdvPatch, and AdvCam.
+    \item Diff-PGD can be applied to specific tasks such as digital attacks, physical-world attacks, and style-based attacks, outperforming baseline methods such as PGD \citep{madry2019deep}, AdvPatch \citep{brown2018adversarial}, and AdvCam \citep{lee2021antiadversarially}.
     \item Diff-PGD is more stable and controllable compared to existing methods for generating natural-style adversarial samples.
     % \item The samples generated using Diff-PGD have better transferability and anti-purification power than traditional gradient-based methods.
     \item Diff-PGD surpasses the original PGD in Transferability and Purification power
@@ -135,7 +139,8 @@ The main claims from the original paper are as follows:
     % \item Diff-rPGD generates images that are more stealthy compared to rPGD-generated samples for digital attacks.
 \end{enumerate}
 
-We will be exploring the first claim in regards to physical-world~\ref{sec:results} and style-based attacks~\ref{sec:results} specifically.
+We explore the first claim in regards to physical-world and style-based attacks specifically,
+and test these attacks on a broader range of images.
 
 % Each experiment in Section~\ref{sec:results} will support (at least) one of these claims, so a reader of your report should be able to separately understand the \emph{claims} and the \emph{evidence} that supports them.
 
@@ -147,12 +152,12 @@ We will be exploring the first claim in regards to physical-world~\ref{sec:resul
 % Explain your approach - did you use the author's code, or did you aim to re-implement the approach from the description in the paper? Summarize the resources (code, documentation, GPUs) that you used.
 
 \subsection{Model descriptions}
-We used ResNet-50, ResNet-101, ResNet-18, Wide-ResNet-50, and Wide-ResNet-101 to classify images. The parameter `weights` was set to the default weight for each model.
+We used ResNet-50 \citep{inproceedings} as our primary classifier. We used the pre-trained models with their default weights.
 
 \subsection{Datasets}
 % For each dataset include 1) relevant statistics such as the number of examples and label distributions, 2) details of train / dev / test splits, 3) an explanation of any preprocessing done, and 4) a link to download the data (if available).
 
-The original paper used ImageNet, but due to limitations in compute and memory, we used a smaller subset of ImageNet with 1000 samples: \url{https://www.kaggle.com/datasets/ifigotin/imagenetmini-1000}
+The original paper used ImageNet, but due to limitations in compute and memory, we used a smaller subset of ImageNet with 1000 samples: \url{https://www.kaggle.com/datasets/ifigotin/imagenetmini-1000}.
 
 % \subsection{Hyperparameters}
 % Describe how the hyperparameter values were set. If there was a hyperparameter search done, be sure to include the range of hyperparameters searched over, the method used to search (e.g. manual search, random search, Bayesian optimization, etc.), and the best hyperparameters found. Include the number of total experiments (e.g. hyperparameter trials). You can also include all results from that search (not just the best-found results).
@@ -163,28 +168,30 @@ The original paper used ImageNet, but due to limitations in compute and memory, 
 % Include a description of how the experiments were set up that's clear enough a reader could replicate the setup.
 % Include a description of the specific measure used to evaluate the experiments (e.g. accuracy, precision@K, BLEU score, etc.).
 % Provide a link to your code.
-
-We used the authors' code, however, since not all parts of the authors' code have been released, we wrote our own code to evaluate a lot of the experiments.
+We used the authors' code (\url{https://github.com/xavihart/Diff-PGD/tree/main}), however, since not all parts of the authors' code have been released, we wrote our own code to evaluate a lot of the experiments.
 We also expanded on some of the authors' experiments with our own code, and reduced the number of iterations in a number of cases, due to time and compute constraints.
-We also added our own code for evaluating the success rates of the authors' code.\\
+We also added our own code for evaluating the success rates of the authors' code along with creating various visualizations.
 % We ran the code given by the authors.
 % We copied the hyperparameter setup of the authors for the most part, but reduced the number of iterations in many cases, and also added our own code for evaluating the success rates of the authors' code.\\
 
-\subsubsection{Success Attack Rate}
-We wrote our own code to test success rate in \url{attack_global.py}.
-We used the same hyperparameters for running Attack\_Global as the authors, except that we chose to use skip=20, to use 78 images per iteration to test success rate.
-If the adversarial sample caused the model to classify the image as anything other than it's original classification, we considered it a successful attack.\\
+\subsubsection{Attack Success Rate}
+We wrote our own code to test success rate. Our measure of success rate is the percentage of successful attacks.
+We consider an attack successful if the adversarial sample caused the model to classify the image as anything other than its original classification.
+% We used the same hyperparameters for running Attack\_Global as the authors, except we used 78 images per iteration, instead of 250 like the original paper, due to our smaller dataset, in order to test success rate.
 
 \subsubsection{Physical-World Attacks}
 % We first tried the one of the attacks created by the authors, which was a computer-mouse.\\
-We tried our own physical world attack using an image patch of a digitally drawn panda head and a laptop as our target object.\\
+We tried two of our own physical world attacks using an image patch of a digitally drawn panda head and a laptop as our target object for the first one,
+and an image patch of a forest photo and a water bottle in the second.
 
-We use a Galaxy A53 5G to take images from the real world and used a MP C4505ex Color Laser Multifunction Printer to print the images in color.\\
+We use a Galaxy A53 5G to take images from the real world and used a MP C4505ex Color Laser Multifunction Printer to print the images in color.
 
 Due to time and compute constraints, we chose to run 1500 iterations for each method instead of 4000 like the original model. We chose 1500 because after running one of the original paper's physical world attacks, the loss converged after around 1000 iterations.
 
-We took the adversarial samples generated using each method (AdvCam, AdvPatch, and Diff-PDG) and stuck them on a laptop.
-We then took multiple pictures of the laptop with the sample on top, with the sample in various different locations and rotations, and tested for success rate on the these photos by classifying them with ResNet-50.
+We took the adversarial samples generated using each method (AdvCam, AdvPatch, and Diff-PDG) and stuck them on a the target object.
+For each adversarial sample (one for each method), we took multiple pictures of the target object with the adversarial sample on top,
+with the sample in various different locations and rotations, and tested for success rate on the these photos by classifying them with ResNet-50.
+We also did this for the original unperturbed image patch and the photo with no image patch.
 % We tested for Success Attack Rate of Diff-PGD using 250 uniformly sampled images from our dataset. (See figure ...)\\
 % The code for the figure in the paper was not provided, so we created our own code to generate the figure.\\
 
@@ -192,21 +199,30 @@ We then took multiple pictures of the laptop with the sample on top, with the sa
 
 % Transferability: Figure 6b+6c\\
 % We also test the success rate attacking adversarially trained ResNet-50
-\subsubsection{Style-Based Attacks}
+\subsubsection{Style-Based and Global Attacks}
+For each iteration, we take a random base image from the test set of the ImageNetMini dataset.
+Then for each image we compare the success rate for creating adversarial samples under 3 different attacks:
+\begin{enumerate}
+  \item Style-based attack with a different target image from ImageNetMini. Along with a mask generated based on the base image
+  \item The same as the above, except no mask is applied.
+  \item Global attack which has no target image and no mask
+\end{enumerate}
+
+We repeat this for 100 images.
 
 \subsection{Computational requirements}
 We ran it on either CPU or MPS. For used MPS for style-based attacks and global attacks, and CPU for physical-world attacks.
-For each model, include a measure of the average runtime (e.g. average time to predict labels for a given validation set with a particular batch size).\\
-
-Global attack success rate took between 5-6 hours to run, while physical-world attacks for one target object and patch took around 1-2 days to run for 1500 iterations.\\
-
-Style-based attack took around 15s per iteration to run.\\
+% For each model, include a measure of the average runtime (e.g. average time to predict labels for a given validation set with a particular batch size).\\
 % For each experiment, include the total computational requirements (e.g. the total GPU hours spent).
 % (Note: you'll likely have to record this as you run your experiments, so it's better to think about it ahead of time). Generally, consider the perspective of a reader who wants to use the approach described in the paper --- list what they would find useful.
 
+Global attack success rate took between 4-5 hours to run, while physical-world attacks for one target object and patch took around 1-2 days to run for 1500 iterations.
+
+The style-based attack took around 15s per image.
+
 \section{Results}
 \label{sec:results}
-Start with a high-level overview of your results. Do your results support the main claims of the original paper? Keep this section as factual and precise as possible, reserve your judgement and discussion points for the next "Discussion" section.
+% Start with a high-level overview of your results. Do your results support the main claims of the original paper? Keep this section as factual and precise as possible, reserve your judgement and discussion points for the next "Discussion" section.
 % \begin{center}
 %   Original paper results
 %   \begin{tabular}{ l c c c c r }
@@ -221,52 +237,58 @@ Start with a high-level overview of your results. Do your results support the ma
 
 
 
-\subsection{Results reproducing original paper}
-For each experiment, say 1) which claim in Section~\ref{sec:claims} it supports, and 2) if it successfully reproduced the associated experiment in the original paper.
-For example, an experiment training and evaluating a model on a dataset may support a claim that that model outperforms some baseline.
-Logically group related results into sections.
+% For each experiment, say 1) which claim in Section~\ref{sec:claims} it supports, and 2) if it successfully reproduced the associated experiment in the original paper.
+% For example, an experiment training and evaluating a model on a dataset may support a claim that that model outperforms some baseline.
+% Logically group related results into sections.
 
 % skip=20
 
-\subsubsection{Attack success rate}
-\begin{figure}
-  \centering
-  % The next line would normally be \includegraphics instead.
-  \includegraphics[scale=0.8]{figures/attack_global_gradpass_success_rate.png}
+% \subsubsection{Attack success rate}
+% \begin{figure}
+%   \centering
+%   % The next line would normally be \includegraphics instead.
+%   \includegraphics[scale=0.6]{figures/attack_global_gradpass_success_rate.png}
 
-  \caption{
-    Blue line is success rate of classifying an image not attacked.
-    Orange line is success rate of causing a different classification with Diff-PGD.
-    Green line is success rate of causing a different classification with Diff-PGD after applying sdedit at the end (purification???).
-  }
-  \label{fig:attack_success_rate}
-\end{figure}
+%   \caption{
+%     Blue line (og) is success rate of classifying an image not attacked.
+%     Orange line (adv) is success rate of causing a different classification with Diff-PGD.
+%     Green line (adv\_diff) is success rate of causing a different classification with Diff-PGD after applying sdedit at the end (purification???).
+%   }
+%   \label{fig:attack_success_rate}
+% \end{figure}
 
-We got a very different result for success rate from that of the original paper (\cref{fig:attack_success_rate}). In the original paper, the success rate of all of the attacks reached 100\% after 5 iterations.
-However, in our case the success rate reached only 60\%-80\% after 15 iterations.\\
+% We got a very different result for success rate from that of the original paper (\cref{fig:attack_success_rate}). In the original paper, the success rate of all of the attacks reached 100\% after 5 iterations.
+% However, in our case the success rate reached only 60\%-80\% after 15 iterations.
 
-\subsubsection{Physical-World Attacks}
-None of the adversarial samples generated by AdvCam, AdvPatch, or Diff-PGD were able to perturb the classification of the image. This was likely due to the fact that we did not adjust the scale properly. This likely means that hyperparameter tuning is very important for physical-world attacks.\\
-
-Because of this, we failed to support or reject the claim that Diff-PGD can be applied to physical-world attacks. However, from the samples generated, the Diff-PGD samples looked less stealthy and more perturbed than those of AdvCam and AdvPatch, which does not support the paper's claim that Diff-PGD generates samples with higher stealthiness.
-However this is likely unimportant in regards to physical-world samples, since the samples generated through every method were quite obviously perturbed.\\
-
-\begin{figure}
+\subsection{Physical-World Attacks}
+\begin{figure}[H]
   \centering
   % The next line would normally be \includegraphics instead.
   \includegraphics[scale=0.42]{figures/physical_panda_on_laptop_success_rate.png}
   \includegraphics[scale=0.42]{figures/physical_forest_on_water_bottle_success_rate.png}
 
   \caption{
+    \textbf{Evaluating Success Rate of Physical-World Attacks}\\
     Blue line is the number of images that were classified correctly as the target label.
     Orange line is the number of images that had a different classification with ResNet-50, but that is not the target class.
     Green line is the number of images whose classifications were one of the following:
-    'notebook, notebook computer' and 'iPod' for panda on laptop, and
-    'rain barrel', 'lighter, light, igniter, ignitor', 'pill bottle', 'hand blower, blow dryer, blow drier, hair dryer and hair drier' for forest on water bottle.
-    These are the classes ResNet-50 gave to images with no adversarial sample (the original image on target object or no image on target object), or classes that we decided had the same meaning as the target object class (ie. laptop vs. notebook computer)
+    'notebook, notebook computer', 'laptop, laptop computer', 'iPod' for panda on laptop, and
+    'water bottle', 'lighter, light, igniter, ignitor', 'rain barrel', 'pill bottle' and 'hand blower, blow dryer, blow drier, hair dryer, hair drier' for forest on water bottle.
+    These are the classes ResNet-50 gave to images with no adversarial sample (the original image on target object or no image on target object), or classes that we decided had a nearly identical similar meaning as the target object class (ie. laptop vs. notebook computer)
   }
-  \label{fig:attack_success_rate}
+  \label{fig:physical}
 \end{figure}
+
+For the panda image adversarial sample and the laptop as the target object,
+at first we found that none of the adversarial samples generated could perturb the classification of the image.
+We thought this might be due to the scale of the image, so we tried to adjust the scale of the image for AdvCam.
+From the different camera rotations, zooms and angles we took the AdvCam image from, only one classified it as something different. However, this class was 'hard disk' (\cref{fig:physical_attack_predictions}), which is also not too far from the original image's classification of 'notebook, notebook computer'.
+
+% None of the adversarial samples generated by AdvCam, AdvPatch, or Diff-PGD were able to perturb the classification of the image. This was likely due to the fact that we did not adjust the scale properly. This likely means that hyperparameter tuning is very important for physical-world attacks.\\
+For the forest image adversarial sample and the water bottle as the target object,
+we found that the AdvCam, AdvPatch and Diff-PGD without purification samples were able to perturb the classification of the image on 1 or 2 of the images,
+while the Diff-PGD sample with purification did not.
+
 
 % We used a laptop as our target object and printed out an image of a laptop. We then stuck the image on a laptop and classified it using all 5 classifiers. We found that the attack was successful for all 5 classifiers. This supports the claim that Diff-PGD can be applied to physical-world attacks.
 
@@ -279,28 +301,9 @@ However this is likely unimportant in regards to physical-world samples, since t
 % network to predict back bag as terriers, and for untargeted settings, the adversarial patch misleads the
 % network to predict computer mouse as artichoke
 
-\subsubsection{Style-Based Attacks}
+\subsection{Style-Based Attacks}
 
-\subsection{Experiment Setup}
-For each iteration, we take a random base image from the test set of the ImageNetMini dataset.
-Then for each image we compare the success rate for creating adversarial samples under 3 different attacks:
-\begin{enumerate}
-  \item Style-based attack with a different target image from ImageNetMini. Along with a mask generated based on the base image
-  \item The same as the above, except no mask is applied.
-  \item Global attack which has no target image and no mask
-\end{enumerate}
-
-\begin{figure}
-  \centering
-  % The next line would normally be \includegraphics instead.
-  \includegraphics[width=\textwidth]{figures/agoodexample.png}
-  \caption{\textbf{Visualization of the different attacks}:} There are 6 rows of images. The first two correspond to a style-based attack with a mask applied. The next 2 rows are the same, except there is no mask. The last 2 rows are a global attack where there is no style image.
-  The 6 columns of images are the following: 1: O stands for the original image. 2: T stands for the style image which we try to make the original look more like.
-  3: ST is the original image with the style image applied, but no adversarial properties. 4: Has the Diff-PGD algorithm applied. 5. Is the image after going through purification. 6: Is the mask applied.
-  \label{fig:attacks}
-\end{figure}
-
-\begin{figure}
+\begin{figure}[H]
   \centering
   % The next line would normally be \includegraphics instead.
   \includegraphics[width=\textwidth]{figures/res_plot.png}
@@ -323,54 +326,142 @@ Then for each image we compare the success rate for creating adversarial samples
 %   \label{fig:attack_style_success_rate}
 % \end{figure}
 
-\subsection{Results beyond original paper}
-Often papers don't include enough information to fully specify their experiments, so some additional experimentation may be necessary. For example, it might be the case that batch size was not specified, and so different batch sizes need to be evaluated to reproduce the original results. Include the results of any additional experiments here. Note: this won't be necessary for all reproductions.
 
-\subsubsection{Additional Result 1}
+\subsection{Results for Global Attack}
+From \cref{fig:attacks_plot} it show the success rate for global attacks is around 65\% before purification, and around 50\% after purification.
+This success rate is slightly lower than in the original paper. We used the same hyperparameters as the author, but tested less images.
+
+\subsection{Results for Style Attack With Mask}
+From \cref{fig:attacks_plot} it shows the success rate for style attacks with a mask applied at around 60\% before purification, and around 40\% after purification.
+The original paper does not provide success rates for this type of attack in particular.
+
+\subsection{Results for Style Attack Without Mask}
+From \cref{fig:attacks_plot} it shows the success rate for style attacks with no mask applied at around 95\% before purification, and around 85\% after purification.
+The original paper does not provide success rates for this type of attack in particular. But the anti-purification results hold up as there is minimal drop in success rate.
 
 \section{Discussion}
 
-\subsection{Attack Success Rates}
-Since the authors have yet to release their code for success rate, we are unsure what caused this difference.
-We did use a different dataset than the authors, this could be a possible reason, since for this calculation, we used 78 images per iteration, while the authors used 250.\\
-%  however it is unlikely this is the reason, because the authors used pre-trained models, and for the global/digital attacks they only used 250 samples from the ImageNet validation set, while we used 78. \\
+% \subsection{Attack Success Rates}
+% Since the authors have yet to release their code for success rate, we are unsure what caused this difference.
+% We did use a different dataset than the authors, this could be a possible reason, since for this calculation, we used 78 images per iteration, while the authors used 250.\\
+% %  however it is unlikely this is the reason, because the authors used pre-trained models, and for the global/digital attacks they only used 250 samples from the ImageNet validation set, while we used 78. \\
 
 % Give your judgement on if your experimental results support the claims of the paper. Discuss the strengths and weaknesses of your approach - perhaps you didn't have time to run all the experiments, or perhaps you did additional experiments that further strengthened the claims in the paper.
 
+\subsection{Attack Success Rates of Physical Attacks}
+Results were very similar across all three methods (Diff-PGD, AdvCam, AdvPatch), so we failed to support or reject the claim that Diff-PGD can be applied to physical-world attacks.
+However, from the samples generated, the Diff-PGD samples looked less stealthy and more perturbed than those of AdvCam and AdvPatch, which does not support the paper's claim that Diff-PGD generates samples with higher stealthiness.
+Fortunately, the stealthiness of physical-world samples is likely less important, since the samples generated through every method were quite obviously perturbed.
+It also appears that the rotation, zoom, and angle the photo was taken at could affect whether the attack was successful or not, since in the water bottle case, some successful misclassifications were caused, but we did not notice any obvious pattern on what camera angles were better than others.
+Even without the adversarial samples, the classifications for the water bottle case were quite varied, and often did not make much sense (i.e. 'rain barrel', 'hand blower, blow dryer, blow drier, hair dryer, hair drier'),
+therefore a likely problem is that we used a dataset that was too small. It may be that since physical attacks have more requirements on robustness, having enough training data is very important on getting the attack to work.
+
+\subsection{Attack Success Rates of Global Attack}
+We did not get great success rates with the global attack. The global attack just adds some noise to the original to change the classification.
+However, one caveat with this method is that some labels in ImageNet are very similar. For example, there is a difference between "great white shark" and "tiger shark".
+We observed that even when a global attack was considered "successful", the label would have simply changed to a different label that is still very similar to the original.
+So while this technically changed the classification to a wrong one, this is an honest mistake that humans would also make.
+
+Due to this, a better measure of success might be to compare the distance between the classification labels before and after the attack using a word-embedding model. This way, mistakes such as getting "great white shark" versus "tiger shark" wrong is punished less.
+Doing this may lead to a lower success score of global attacks since the changes it makes are not very pronounced.
+
+
+\subsection{Attack Success Rates of Style-Based Attacks}
+Style-Based attacks when successful would generally drastically change the classification label from the original. Attacks with no mask that allowed changes to any part of the image were generally more successful, but
+greatly loses the "stealthiness" property claimed in the original paper where changes are hard to detect with the human eye. Attacks with a mask applied, are harder to detect but also have a lower success rate.
+
+This could be due to the fact that we are using random images as our original and our target.
+In the original paper, they have specific examples where the target image is of a similar shape to the original.
+Which leads to the attacks being more effective see \cref{app:stealthy} for an example.
 
 \subsection{What was easy}
 Running the code from the original authors to generate adversarial samples was fairly easy, since documentation was included in how to run each attack.
 
-The included code had print statements at each iteration, on the speed each iteration was taking, which was helpful in timing how long the model would take to run.
+The authors did not include much documentation for how the code worked within the code itself, however they did include some explanations in the paper.
+This separation made it a bit difficult to understand what the attack parameters did, however the naming was quite clear for the most part, so this was not too difficult to follow.
+
+The original code had print statements at each iteration, providing the speed each iteration was taking. This was helpful in timing how long the model would take to run.
 % Give your judgement of what was easy to reproduce. Perhaps the author's code is clearly written and easy to run, so it was easy to verify the majority of original claims. Or, the explanation in the paper was really easy to follow and put into code.
 
 % Be careful not to give sweeping generalizations. Something that is easy for you might be difficult to others. Put what was easy in context and explain why it was easy (e.g. code had extensive API documentation and a lot of examples that matched experiments in papers).
 
 \subsection{What was difficult}
-List part of the reproduction study that took more time than you anticipated or you felt were difficult.
 
-Be careful to put your discussion in context. For example, don't say "the maths was difficult to follow", say "the math requires advanced knowledge of calculus to follow".
-
-There was little to no documentation on the inner workings of the code, making it more difficult to understand a lot of the attack parameters, and what they did, however the naming was quite clear for the most part, so this was not too difficult to follow.
-
-The physical-world attack was a lot more difficult to reproduce than we anticipated. AdvCam and AdvPatch both ran fairly quickly, averaging around 2-3s per iteration. However, Diff-PGD averaged around 60s per iteration, which took multiple days to run.
-Because of this, instead of running 4000 iterations as was done in the original paper, we only ran 1500 iterations for each image.\\
-None of the models were able to perturb the classification of the image, which was likely due to the fact that we did not adjust the scale properly.
+The physical-world attack was a lot more difficult to reproduce than we anticipated.
+AdvCam and AdvPatch both ran fairly quickly, averaging around 2-3s per iteration. However, Diff-PGD averaged around 60s per iteration, which took multiple days to run.
+We got very low success rates for the physical-world attacks, which may be because physical-world attacks have more requirements on robustness.
 This likely means that hyperparameter tuning is very important for physical-world attacks. However, tuning the model is more challenging for Diff-PGD for physical-world attacks, due to how slowly it runs.
 Another mistake we made was assuming the the classifier would classify a closed laptop as a laptop, when in reality it classified it as a notebook.
 We looked into the ImageNet database, and found that most of the images in both laptop and notebook classes were of open laptops, while we used a closed laptop.
-Since the photo's original label was fed into the model, this could have possibly caused problems with the model. \\
+Since the photo's original label was fed into the model, this could have possibly caused problems with the model.
 
-\subsection{Communication with original authors}
-We did not communicate with the original authors.
+\section{Conclusions}
+
+We failed to reproduce results for physical-world attacks. Our success-rate was very low, and the adversarial samples generated were less stealthy than baseline models.
+We conclude our hyper-parameter tuning was insufficient to deal with the robustness required for physical-world attacks.
+
+For style-based attacks, the Diff-PGD adversarial samples tend to have higher success rates, and are harder to detect with the human eye when the target image is
+created more-carefully to look like the original. Using random images as the target still lead to success in confusing the model, but oftentimes, the adversarial sample would not look like the original.
+Also, the measure of success rate could be improved. Some images are hard to classify, such as different breeds of dogs. Perhaps the model should not be punished as heavily for
+miss-classifying similar labels. This could be done by measuring vector-embedding distance between labels as a measure of success.
 
 
-\section*{References}
+
+
+\section{Acknowledgement}
+We would like to thank the CPSC 440 teaching team for their guidance this term.
+We would also like to thank the original authors for their work leading to this paper.
+
+% \section*{References}
+\printbibliography
+
+\newpage
 
 \appendix
 
+
 \section{Supplementary material} \label{app:info}
 
+\section{Link to Our Github Repo}
+\url{https://github.com/Sokole1/CPSC440Proj}
+
+\begin{figure}[H]
+  \centering
+  % The next line would normally be \includegraphics instead.
+  \includegraphics[width=\textwidth]{figures/agoodexample.png}
+  \caption{\textbf{Visualization of the different attacks}:} There are 6 rows of images. The first two correspond to a style-based attack with a mask applied. The next 2 rows are the same, except there is no mask. The last 2 rows are a global attack where there is no style image.
+  The 6 columns of images are the following: 1: O stands for the original image. 2: T stands for the style image which we try to make the original look more like.
+  3: ST is the original image with the style image applied, but no adversarial properties. 4: Has the Diff-PGD algorithm applied. 5. Is the image after going through purification. 6: Is the mask applied.
+  \label{fig:attacks}
+\end{figure}
+
+\subsection{Style-based attacks}
+\begin{figure}[H]
+  \centering
+  % The next line would normally be \includegraphics instead.
+  \includegraphics[width=\textwidth]{figures/great_style_attack.png}
+  \caption{\textbf{A Hard to Notice Style-Attack}}
+  \label{app:stealthy}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  % The next line would normally be \includegraphics instead.
+  \includegraphics[width=\textwidth]{figures/g_not_style.png}
+  \caption{\textbf{An Easier to Notice Style-Attack}}
+  \label{app:non_stealth}
+\end{figure}
+
 \subsection{Physical attacks}
+
+\begin{figure}[H]
+  \centering
+  % The next line would normally be \includegraphics instead.
+  \includegraphics[width=\textwidth]{figures/physical_samples_panda_on_laptop.png}
+  \includegraphics[width=\textwidth]{figures/physical_samples_forest_on_water_bottle.png}
+  \caption{\textbf{Visualization of the different attacks}:}
+  Predictions made for adversarial samples with photos taken at different angles, zooms and rotations.
+  \label{fig:physical_attack_predictions}
+\end{figure}
 
 \end{document}
