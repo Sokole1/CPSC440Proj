@@ -72,26 +72,53 @@ def test_single_image(x, classifier, device, y, y_target=None, name='attack_phys
 
     # print(y_pred, classifier(x_adv).argmax(1), classifier(pred_x0).argmax(1))
 
-    print(f"Results for image {name}:\n \
-                Original = {y} : {d_dict[y]}\n  \
-                Predicted = {y_pred.item()} : {d_dict[y_pred.item()]}\n  \
-                Target = {y_target} : {d_dict[y_target]}")
+    # print(f"Results for image {name}:\n \
+    #             Original = {y} : {d_dict[y]}\n  \
+    #             Predicted = {y_pred.item()} : {d_dict[y_pred.item()]}\n  \
+    #             Target = {y_target} : {d_dict[y_target]}")
 
     if y_target is not None:
-        return y_pred == y_target, y_pred
-    return classifier(x).argmax(1) == y, y_pred
+        if y_pred == y_target:
+            return 2 if y_pred == y_target else 0, y_pred, d_dict[y_pred.item()]
+        return 1 if y_pred == y_target else 0, y_pred, d_dict[y_pred.item()]
+    return 1 if classifier(x).argmax(1) == y else 0, y_pred, d_dict[y_pred.item()]
 
-def load_physical_samples(device):
-    bkg_dir = 'data/samples/physical/*/*/*/'
-    print("HERE")
+def load_physical_samples(device, category = '620+530', name='panda on laptop'):
+    bkg_dir = f'data/samples/physical/{category}/*/'
+    # print("HERE")
     print(glob.glob(bkg_dir+'/*.png') + glob.glob(bkg_dir+'/*.jpg'))
     bkg_all = glob.glob(bkg_dir+'/*.jpg')
     bkg_all += glob.glob(bkg_dir+'/*.png')
 
+    # each model needs a success rate score, and two for if there is a target
+
+    original_labels = set()
+    models = {}
+
     images = []
     for bkg_selected in bkg_all:
+        y_target = None
         path = bkg_selected.split('/')
+        if not ('original' in bkg_selected) and not ('none' in bkg_selected):
+            continue
         iterations = path[-4]
+        label = path[-3]
+        arr = label.split('+')
+        y = int(arr[0])
+        original_labels.add(d_dict[y])
+        if len(arr) > 1:
+            y_target = int(arr[1])
+        adv_model = path[-2]
+        # print(path[-2])
+        bkg = load_png(bkg_selected, 224)[None, ...].to(device)
+        is_correct, y_pred, y_pred_label = test_single_image(bkg.clone(), 'resnet50', device, y=y, y_target=y_target, name=adv_model)
+        original_labels.add(y_pred_label)
+
+    for bkg_selected in bkg_all:
+        path = bkg_selected.split('/')
+        if 'original' in bkg_selected or 'none' in bkg_selected:
+            continue
+
         label = path[-3]
         arr = label.split('+')
         y = int(arr[0])
@@ -100,7 +127,16 @@ def load_physical_samples(device):
         adv_model = path[-2]
         print(path[-2])
         bkg = load_png(bkg_selected, 224)[None, ...].to(device)
-        is_correct, y_pred = test_single_image(bkg.clone(), 'resnet50', device, y=y, y_target=y_target, name=adv_model)
+        is_correct, y_pred, y_pred_label = test_single_image(bkg.clone(), 'resnet50', device, y=y, y_target=y_target, name=adv_model)
+
+        if adv_model not in models:
+            models[adv_model] = [0, 0, 0]
+        if y_target is not None and y_pred == y_target:
+            models[adv_model][2] += 1
+        elif not (y_pred_label in original_labels):
+            models[adv_model][1] += 1
+        else:
+            models[adv_model][0] += 1
 
         images.append(
             add_caption(
@@ -108,10 +144,45 @@ def load_physical_samples(device):
                 f"{adv_model}: {d_dict[y_pred.item()]}",
             )
         )
+    N = len(models.keys())
+    x = models.keys()
+    failed = np.zeros(N)
+    change_success = np.zeros(N)
+    target_success = np.zeros(N)
 
-    si(images, './physical_samples.png')
+    # loop through models dict
+    for i, key in enumerate(x):
+        value = models[key]
+        print(f"Model: {key}\n \
+            Fail: {value[0]}\n \
+            Targeted Success Rate: {value[2]}\n \
+            Changed: {value[1]}")
+        failed[i] = value[0]
+        change_success[i] = value[1]
+        target_success[i] = value[2]
+
+    if y_target is not None:
+        plt.bar(x, target_success, color='b')
+        plt.bar(x, change_success, bottom = target_success, color='orange')
+        plt.bar(x, failed, bottom = target_success + change_success, color='g')
+        plt.legend(['Predicted target', 'Class Change', 'Attack Failed'])
+    else:
+        plt.bar(x, change_success, color='orange')
+        plt.bar(x, failed, bottom = change_success, color='g')
+        plt.legend(['Class Change', 'Attack Failed'])
+
+    plt.xlabel("Adversarial Attack Methods")
+    plt.ylabel("Image Count")
+    plt.title(name)
+
+    plt.savefig(f'./physical_{name.replace(" ", "_")}_success_rate.png')
+    plt.close()
+    si(images, f'./physical_samples_{name.replace(" ", "_")}.png')
+
+    print(f"Original Labels: {original_labels}")
 
 load_physical_samples('mps')
+load_physical_samples('mps', category = '898', name='forest on water bottle')
 bkg_dir = 'data/samples/physical/1400/'
 print("HERE")
 # print(glob.glob(bkg_dir+'/*/*.png') + glob.glob(bkg_dir+'/*/*.jpg'))
